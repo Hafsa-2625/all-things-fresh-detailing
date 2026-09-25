@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  html, body { margin: 0; }
+  body { color: #16191a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: #1f5f4a; }
+  a:hover { color: #143f31; }
+</style>
+</helmet>
+
+<doc-page margin="0.7in">
+
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 2px solid #16191a; padding-bottom: 10px; margin-bottom: 26px;">
+    <span style="font-size: 10pt; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">All Things Fresh &mdash; backend build spec</span>
+    <span style="font-size: 9pt; color: #7b817e;">v1 &middot; 28 August 2026</span>
+  </div>
+
+  <h1 style="font-size: 26pt; line-height: 1.05; letter-spacing: -0.03em; font-weight: 700; margin: 0 0 14px;">Backend, CMS and page expansion under an absolute design freeze</h1>
+  <p style="font-size: 11.5pt; line-height: 1.6; color: #3d4341; margin: 0 0 26px; max-width: 46em;">This document is the implementation contract for the All Things Fresh website. The approved public design is the visual source of truth and does not change. Everything below describes what may be built behind it, what the admin may edit, and how each stage is proven not to have altered a single pixel of the public pages.</p>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb;">1. Scope</h2>
+  <table style="width: 100%; border-collapse: collapse; font-size: 10pt; margin: 0 0 24px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid #16191a; font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">In scope</th>
+        <th style="text-align: left; padding: 7px 0 7px 10px; border-bottom: 1px solid #16191a; font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Out of scope</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align: top; padding: 10px 10px 10px 0; border-bottom: 1px solid #edeeea; line-height: 1.6;">Structured content fields bound to existing components. CRM: leads, customers, vehicles, quotes, jobs, appointments, invoices, payments. Notification routing. SEO metadata, structured data, redirects. Four public page templates covering 60+ new URLs. A separate authenticated admin interface. Visual-regression test suite.</td>
+        <td style="vertical-align: top; padding: 10px 0 10px 10px; border-bottom: 1px solid #edeeea; line-height: 1.6;">Any change to public layout, typography, colour, spacing, imagery, animation or section order. Any redesign or modernisation. Any visual page builder. Any new public design pattern. Dependency upgrades that alter rendering. Global theme controls.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb;">2. The design contract</h2>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 14px; max-width: 46em;">These values are read out of the approved build. They are the only values that may appear on a public page. Anything not on this list is a new design decision and needs approval before it ships.</p>
+
+  <h3 style="font-size: 11pt; font-weight: 700; margin: 18px 0 8px;">Type</h3>
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 18px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Token</th>
+        <th style="text-align: left; padding: 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Value</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Used by</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Body face</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">Arial, Helvetica, sans-serif</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Everything except the hero wordmark</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Wordmark face</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">'Alex Brush', 'Great Vibes', cursive</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Hero h1 only</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Display heading</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">clamp(39px, 4.5vw, 62px) / 0.92 / -0.085em / 700</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Section h2, subpage h1</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Display heading, large</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">clamp(44px, 5vw, 70px) &middot; closing CTA clamp(53px, 7vw, 92px)</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Services, closing CTA</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Card heading</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">24px / -0.05em &middot; small 17px / -0.03em / 700</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Service cards, light cards</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Lede</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">15&ndash;18px / 1.45&ndash;1.5 / #4f4f4f</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Section intros</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Body small</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">12px / 1.5 / #747474</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Card copy, step copy</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Eyebrow</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">10px / 0.12em&ndash;0.14em / uppercase / 700 / #929292</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Section labels</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Stat numeral</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">26px / -0.05em / 700 / line-height 1</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Service-area and case-study stats</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Article prose</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">16px / 1.7 / #4f4f4f &middot; h2 28px / 1.1 / -0.05em</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Resource template only &mdash; see &sect;7</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size: 11pt; font-weight: 700; margin: 18px 0 8px;">Colour</h3>
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 18px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Role</th>
+        <th style="text-align: left; padding: 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Hex</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Ink / primary button</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#050505</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Nav contact button uses #0b0b0b</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Dark section</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#050505 &middot; cards #0e0e0e &middot; border #242424</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Services section only</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Tint section</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#fafafa</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Max two background colours per page</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Accent</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#d9f5ff fill &middot; #27aee9 check icon</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Never as a text colour</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Wordmark blue</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#3268B5, stroke #12385f</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Hero h1 only</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Copy greys</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#4f4f4f, #747474, #888, #8a8a8a, #929292, #9a9a9a</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">#888 is the muted half of two-tone headings</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Hairlines</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#e7e5e1, #e8e8e8, #efedea, #dcd9d4 inputs</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">1px always</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Review surface</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#f4f4f4 &middot; stars #f5a623</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Reviews only</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Nav surface</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">#fffefc &middot; active pill #2c3033 &middot; link #4a4540</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Header and social buttons</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size: 11pt; font-weight: 700; margin: 18px 0 8px;">Geometry and motion</h3>
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 24px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Token</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Container</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">width: min(100%, 1120px); margin: auto</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Section padding</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">100px 30px &middot; tint sections 40px 30px 100px</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Radii</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">hero panel 20px &middot; cards 12/14/16/18px &middot; pills 999px &middot; nav 0 20px 0 28px</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Card grid</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">repeat(3, 1fr) &middot; gap 12px dark, 16&ndash;22px light</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Button, small</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">padding 14px 21px &middot; 12px / 700 &middot; radius 999px</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Button, large</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">padding 17px 22px &middot; 15px / 700</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Shadows</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">0 14px 34px rgba(20,26,40,0.05) &middot; hover 0 16px 34px rgba(20,26,40,0.09)</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Hover</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">translateY(-2px) buttons &middot; -3px cards &middot; -3px scale(1.02) service buttons</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Transitions</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">0.2s ease buttons &middot; 0.25s ease cards</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Car transition</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">8.5s cubic-bezier(0.45,0,0.55,1) infinite, mask-size 260% 100%</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Floating logo</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">5.5s ease-in-out infinite, paired shadow keyframe</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Reduced motion</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">all four animations disabled, clean car pinned visible</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb; break-before: page;">3. Content model</h2>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 14px; max-width: 46em;">Every field below is a structured field bound to one slot in one approved component. There is no free-form block, no rich-text field that can emit its own styles, and no way to add a section that does not already exist.</p>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 24px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Collection</th>
+        <th style="text-align: left; padding: 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Fields</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Bound component</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Site settings</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">phone, email, hours, service-area copy, city list, Instagram, TikTok, Facebook, Google Maps URL, review-request URL, Jobber embed URL, customer count</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Header, hero, footer, booking, service area</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Navigation</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">label, destination, order, visible (max 5 primary items &mdash; the pill fits five)</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Nav pill, footer nav</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Service</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">name, slug, index number, short blurb (max 120 chars), long body, media slot, price-from, packages[name, price, blurb], inclusions[title, note], faqs[q, a], CTA label, SEO fields</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Service card, package card, check-list row, FAQ card</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Add-on</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">name, price, applies-to services[]</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Price-row list</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Location</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">city, state, slug, two unique local paragraphs (required, min 120 words combined), neighbourhood list, drive time, map query, three local differentiators, linked reviews[], SEO fields</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Subpage hero, check-list row, map panel, stat panel, list card, review card</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Resource article</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">title, slug, category, updated date, read time, lede, body (h2 + paragraph + check-list + price-row only), related[], SEO fields</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Prose column, bordered card, light card</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Case study</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">vehicle, city, service, hours on site, before image, after image, ordered steps[title, note], stats[value, label], approved customer quote (nullable), SEO fields</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Before/after slider, numbered step card, stat panel, review card</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Review</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">name, initial, avatar colour, date, stars, text, source, city, approved flag, featured flag</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Review card, review carousel</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Media</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">file, alt text, aspect lock, slot binding. Uploads are re-encoded to the slot's exact dimensions so no image can shift layout.</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">All image slots</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Lead</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">name, phone, email, SMS consents, address, service, vehicle type, make and model, preferred date, arrival windows[], source, stage, owner, notes</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Booking form (public), admin pipeline</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Customer &middot; Vehicle</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">customer[name, phone, email, address, marketing consent, lifetime value]; vehicle[year, make, model, colour, plate, notes, customer ref]</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Admin only</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">Quote &middot; Job &middot; Invoice</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">quote[line items, total, sent, expires, status]; job[date, window, crew, address, checklist, photos, status]; invoice[lines, total, issued, due, payments[], status]</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Admin only</td></tr>
+      <tr><td style="vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid #edeeea; font-weight: 600;">SEO &middot; Redirect</td><td style="vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">title tag, meta description, canonical, OG image, robots, schema type and payload; redirect[from, to, code]</td><td style="vertical-align: top; padding: 8px 0 8px 10px; border-bottom: 1px solid #edeeea; line-height: 1.55;">Document head only, never visible markup</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb;">4. What the admin cannot reach</h2>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 12px; max-width: 46em;">These controls are not disabled in the interface. They are never rendered, and no API route accepts them. Changing any of them is a code change gated behind a passing visual-regression run.</p>
+  <p style="font-size: 10pt; line-height: 1.9; color: #3d4341; margin: 0 0 24px; max-width: 46em;">Font family &middot; font size &middot; font weight &middot; line height &middot; letter spacing &middot; text colour &middot; background colour &middot; gradient &middot; border &middot; corner radius &middot; shadow &middot; padding &middot; margin &middot; gap &middot; container width &middot; grid columns &middot; breakpoints &middot; section order &middot; section structure &middot; element position &middot; z-index &middot; animation timing &middot; animation easing &middot; hover and focus styling &middot; component styling &middot; custom CSS &middot; custom JavaScript &middot; arbitrary page-builder blocks &middot; section drag-and-drop &middot; global theme replacement.</p>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 24px; max-width: 46em;">Two content-side guards follow from the same principle. Text fields carry character limits derived from the space the approved component gives them, so no entry can wrap a heading onto an extra line. Image uploads are re-encoded to the slot's exact pixel dimensions, so no upload can change the height of a section.</p>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb;">5. URL map</h2>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 14px; max-width: 46em;">Sixty-four URLs, four templates, zero custom layouts. Every page is one of the four templates filled with different content.</p>
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 18px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Pattern</th>
+        <th style="text-align: left; padding: 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Template</th>
+        <th style="text-align: left; padding: 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Count</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Source collection</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">Homepage (existing)</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">1</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Site settings + services + reviews</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/services/{slug}</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">T1 Service</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">8</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Service</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/service-area/{city}-oh</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">T2 Location</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">36</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Location (one per city in the footer list)</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/resources/{slug}</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">T3 Resource</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">12</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Resource article</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/our-work/{slug}</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">T4 Case study</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">6</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Case study</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/services, /service-area, /resources, /our-work</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">T1 index variant</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">4</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Light-card grid over the collection</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea; font-family: ui-monospace, Menlo, monospace; font-size: 9pt;">/reviews, /book, /privacy, /terms, /sms-consent, /sitemap.xml, /robots.txt</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">T3 prose variant</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">7</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Site settings + static prose</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 24px; max-width: 46em;">The thirty-six location pages are the duplicate-content risk. Each one requires two genuinely local paragraphs, its own neighbourhood list, its own drive time, and at least one review from a customer in or near that city. The admin blocks publishing a location page whose body text is more than 70% similar to any other location page, and the SEO view surfaces those overlaps before they go live.</p>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb; break-before: page;">6. Visual-regression protection</h2>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 14px; max-width: 46em;">Baselines are captured before any CMS or backend code is connected, and every stage after that is measured against them.</p>
+
+  <h3 style="font-size: 11pt; font-weight: 700; margin: 18px 0 8px;">Baseline matrix</h3>
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 18px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Viewport</th>
+        <th style="text-align: left; padding: 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Captures per page</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">375 &times; 812</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">Full page, plus hero, services, booking, footer</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Mobile</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">768 &times; 1024</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">Same four regions</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Tablet</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">1440 &times; 900</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">Same four regions</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Desktop</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Every reference screenshot's exact size</td><td style="padding: 7px 10px; border-bottom: 1px solid #edeeea;">Full page</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">One entry per supplied approval screenshot</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size: 11pt; font-weight: 700; margin: 18px 0 8px;">Deterministic capture rules</h3>
+  <p style="font-size: 10.5pt; line-height: 1.7; color: #3d4341; margin: 0 0 14px; max-width: 46em;">The homepage has four running animations, so a naive screenshot test fails at random. Each of them is pinned to a fixed frame before capture, not disabled:</p>
+  <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 0 0 18px;">
+    <thead>
+      <tr>
+        <th style="text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Moving element</th>
+        <th style="text-align: left; padding: 6px 0 6px 10px; border-bottom: 1px solid #16191a; font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4d5350;">Pinned state for capture</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Dirty / clean car masks</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Three captures per viewport, at animation-delay 0s, 4.25s and 8.4s</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Floating logo and its shadow</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Paused at 0s</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Review carousel</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Timer stubbed, index forced to 0</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Before/after slider</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Handle set to 55%, the default</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Social carousel</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">scrollLeft 0, Instagram tab active</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">Google Maps iframe</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Masked. It is genuinely dynamic third-party content. Its container box is asserted separately by bounding-rect check, not by pixels.</td></tr>
+      <tr><td style="padding: 7px 10px 7px 0; border-bottom: 1px solid #edeeea;">YouTube poster</td><td style="padding: 7px 0 7px 10px; border-bottom: 1px solid #edeeea;">Stubbed to a fixture image so thumbnail changes do not fail the run</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 14px; max-width: 46em;">Web fonts are loaded from a local fixture rather than the Google Fonts CDN during tests, and every run waits on <span style="font-family: ui-monospace, Menlo, monospace; font-size: 9.5pt;">document.fonts.ready</span> plus all image decodes before capturing. Nothing else is masked. Masking a layout area to make a diff pass is treated as a failed run.</p>
+
+  <h3 style="font-size: 11pt; font-weight: 700; margin: 18px 0 8px;">Gate for every stage</h3>
+  <ol style="font-size: 10.5pt; line-height: 1.7; color: #3d4341; margin: 0 0 14px; padding-left: 22px; max-width: 46em;">
+    <li>Render each existing public page at every viewport in the matrix.</li>
+    <li>Diff against the approved baseline at a zero-tolerance threshold, with a 1px anti-aliasing allowance only.</li>
+    <li>Assert bounding rectangles for the hero panel, nav pill, each card grid, the booking form and the footer, so a diff that passes visually still fails if geometry moved.</li>
+    <li>Assert computed styles for the ten type tokens and nine colour roles in section 2.</li>
+    <li>Assert a cumulative layout shift of 0 on every page.</li>
+    <li>Investigate every unexplained pixel. No stage is approved while one remains.</li>
+  </ol>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 24px; max-width: 46em;">Public pages must load no admin bundle. That is asserted directly: the test fails if any request from a public route resolves to an admin chunk, or if any admin stylesheet rule is present in the page's style sheets.</p>
+
+  <h2 style="font-size: 15pt; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #dcdedb;">7. Open items needing your approval</h2>
+  <p style="font-size: 10.5pt; line-height: 1.65; color: #3d4341; margin: 0 0 14px; max-width: 46em;">The freeze says to stop and flag rather than invent. These are the flags.</p>
+
+  <div style="display: grid; gap: 12px; margin: 0 0 20px;">
+    <div style="border: 1px solid #dcdedb; border-radius: 8px; padding: 14px 16px; break-inside: avoid;">
+      <div style="font-size: 10.5pt; font-weight: 700; margin-bottom: 5px;">1. Typography discrepancy: Outfit versus Arial</div>
+      <div style="font-size: 10pt; line-height: 1.6; color: #3d4341;">The freeze instruction names Outfit as the approved typeface. The approved build sets <span style="font-family: ui-monospace, Menlo, monospace; font-size: 9.5pt;">font-family: Arial, Helvetica, sans-serif</span> on the body and loads only Alex Brush and Great Vibes. Since the built output is the visual source of truth, the templates match the build and use the Arial stack. Confirm which is correct. Switching to Outfit is a deliberate visual change to every page and needs its own baseline.</div>
+    </div>
+    <div style="border: 1px solid #dcdedb; border-radius: 8px; padding: 14px 16px; break-inside: avoid;">
+      <div style="font-size: 10.5pt; font-weight: 700; margin-bottom: 5px;">2. Subpage hero has no approved baseline</div>
+      <div style="font-size: 10pt; line-height: 1.6; color: #3d4341;">Only the homepage hero exists today. The templates reuse its radial-gradient panel, its 20px radius and the nav pill exactly, but the panel grows with content instead of holding a fixed aspect ratio, the car pair is omitted, and the page title uses the approved section-heading token rather than the Alex Brush wordmark. Those are the three decisions to confirm.</div>
+    </div>
+    <div style="border: 1px solid #dcdedb; border-radius: 8px; padding: 14px 16px; break-inside: avoid;">
+      <div style="font-size: 10.5pt; font-weight: 700; margin-bottom: 5px;">3. Long-form prose scale</div>
+      <div style="font-size: 10pt; line-height: 1.6; color: #3d4341;">The approved build has no article body copy. The resource template derives one: 16px / 1.7 body from the existing 15&ndash;18px lede, and 28px / -0.05em subheads sitting between the existing 24px card heading and the 39px section heading. No new colours or faces. Confirm the two derived sizes.</div>
+    </div>
+    <div style="border: 1px solid #dcdedb; border-radius: 8px; padding: 14px 16px; break-inside: avoid;">
+      <div style="font-size: 10.5pt; font-weight: 700; margin-bottom: 5px;">4. Nav active state on subpages</div>
+      <div style="font-size: 10pt; line-height: 1.6; color: #3d4341;">The approved nav marks Home with the dark #2c3033 pill. On a service or location page the active item should arguably move to Services. The templates leave Home active so nothing differs from the baseline. Confirm whether the pill should follow the current route.</div>
+    </div>
+    <div style="border: 1px solid #dcdedb; border-radius: 8px; padding: 14px 16px; break-inside: avoid;">
+      <div style="font-size: 10.5pt; font-weight: 700; margin-bottom: 5px;">5. Nav capacity at 36 location pages</div>
+      <div style="font-size: 10pt; line-height: 1.6; color: #3d4341;">The nav pill holds five items plus the phone number and Contact button. Thirty-six location pages cannot be surfaced there. The templates reach them through the footer city list and a <span style="font-family: ui-monospace, Menlo, monospace; font-size: 9.5pt;">/service-area</span> index page. Adding a dropdown to the nav would be a new public pattern, so it is not built. Confirm the footer route is acceptable.</div>
+    </div>
+    <div style="border: 1px solid #dcdedb; border-radius: 8px; padding: 14px 16px; break-inside: avoid;">
+      <div style="font-size: 10.5pt; font-weight: 700; margin-bottom: 5px;">6. Missing baseline screenshots</div>
+      <div style="font-size: 10pt; line-height: 1.6; color: #3d4341;">The matrix in section 6 includes one entry per supplied approval screenshot. Those screenshots have not been supplied to this project. Send them and the matrix can be completed; until then only the three standard viewports are covered.</div>
+    </div>
+  </div>
+
+  <div style="border-top: 2px solid #16191a; margin-top: 26px; padding-top: 10px; display: flex; justify-content: space-between; gap: 20px; font-size: 9pt; color: #7b817e;">
+    <span>All Things Fresh Auto Detailing &mdash; backend build spec</span>
+    <span>Companion files: ATF Page Templates, ATF Admin, ATF Handoff</span>
+  </div>
+
+</doc-page>
+</x-dc>
+</body>
+</html>

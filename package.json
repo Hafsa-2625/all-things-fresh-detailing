@@ -1,0 +1,46 @@
+{
+  "name": "atf-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "seed:tenant": "node scripts/run-tsx.cjs scripts/seed-tenant.ts",
+    "admin:super": "node --env-file=.env.local scripts/run-tsx.cjs scripts/set-super-admin.ts",
+    "seed:content": "node scripts/run-tsx.cjs scripts/seed-content.ts",
+    "seo:stats": "node scripts/run-tsx.cjs scripts/seo-stats.ts",
+    "seo:export": "node scripts/run-tsx.cjs scripts/export-url-inventory.ts",
+    "qa:crawl": "node scripts/run-tsx.cjs scripts/crawl-check.ts",
+    "qa:api": "node scripts/run-tsx.cjs scripts/api-smoke.ts",
+    "qa:security": "node scripts/run-tsx.cjs scripts/security-e2e.ts",
+    "build:visual": "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= SUPABASE_SERVICE_ROLE_KEY= next build",
+    "start:visual": "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= SUPABASE_SERVICE_ROLE_KEY= next start -p 3200",
+    "test:visual": "playwright test --project=visual",
+    "test:visual:docker": "docker run --rm --add-host=host.docker.internal:host-gateway -v \"$PWD\":/work -w /work -e VISUAL_BASE_URL=http://host.docker.internal:3200 mcr.microsoft.com/playwright:v1.62.1-noble npx playwright test --project=visual",
+    "test:visual:update": "npm run test:visual:docker -- --update-snapshots",
+    "seo:report": "node scripts/run-tsx.cjs scripts/seo-report-data.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.12",
+    "typescript": "^5"
+  }
+}

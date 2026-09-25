@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html, body { margin: 0; background: #eff0ed; }
+  body { color: #16191a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #1f5f4a; text-decoration: none; }
+  a:hover { color: #143f31; }
+  button, input, select, textarea { font: inherit; box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #cfd2cd; border-radius: 6px; border: 3px solid #eff0ed; }
+</style>
+</helmet>
+
+<div style="display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; align-items: stretch;">
+
+  <aside style="background: #16191a; color: #c9cfcc; padding: 18px 14px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 0; height: 100vh; box-sizing: border-box;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 6px 8px;">
+      <span style="width: 30px; height: 30px; border-radius: 8px; background: #1f5f4a; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; letter-spacing: -0.02em;">AF</span>
+      <span style="display: grid; gap: 2px;">
+        <span style="font-size: 12px; font-weight: 600; color: #fff;">All Things Fresh</span>
+        <span style="font-size: 10px; color: #78837f;">Operations console</span>
+      </span>
+    </div>
+
+    <nav style="display: grid; gap: 3px;">
+      <span style="font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #5f6a66; padding: 8px 8px 4px;">Operations</span>
+      <button onClick="{{ goToday }}" style="{{ navToday }}"><span style="{{ dotToday }}"></span>Today</button>
+      <button onClick="{{ goLeads }}" style="{{ navLeads }}"><span style="{{ dotLeads }}"></span>Leads &amp; quotes<span style="margin-left: auto; font-size: 10px; background: #1f5f4a; color: #fff; border-radius: 999px; padding: 2px 7px;">4</span></button>
+      <button onClick="{{ goJobs }}" style="{{ navJobs }}"><span style="{{ dotJobs }}"></span>Jobs &amp; schedule</button>
+      <button onClick="{{ goInvoices }}" style="{{ navInvoices }}"><span style="{{ dotInvoices }}"></span>Invoices &amp; payments</button>
+      <button onClick="{{ goCustomers }}" style="{{ navCustomers }}"><span style="{{ dotCustomers }}"></span>Customers &amp; vehicles</button>
+      <span style="font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #5f6a66; padding: 14px 8px 4px;">Website</span>
+      <button onClick="{{ goContent }}" style="{{ navContent }}"><span style="{{ dotContent }}"></span>Content fields</button>
+      <button onClick="{{ goSeo }}" style="{{ navSeo }}"><span style="{{ dotSeo }}"></span>SEO &amp; pages</button>
+      <button onClick="{{ goStaff }}" style="{{ navStaff }}"><span style="{{ dotStaff }}"></span>Staff &amp; permissions</button>
+    </nav>
+
+    <div style="margin-top: auto; border: 1px solid #262b2c; border-radius: 8px; padding: 12px; display: grid; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 7px; font-size: 10px; color: #8f9a96;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #45c08d;"></span>
+        Design freeze active
+      </div>
+      <div style="font-size: 10px; line-height: 1.5; color: #6e7a76;">Style, layout and structure controls are locked. Content edits only.</div>
+    </div>
+  </aside>
+
+  <main style="min-width: 0;">
+
+    <header style="background: #fff; border-bottom: 1px solid #e1e2de; padding: 16px 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 10;">
+      <div style="display: grid; gap: 3px;">
+        <h1 style="font-size: 17px; font-weight: 650; letter-spacing: -0.01em; margin: 0;">{{ viewTitle }}</h1>
+        <span style="font-size: 11px; color: #7b817e;">{{ viewSubtitle }}</span>
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+        <label style="display: flex; align-items: center; gap: 8px; border: 1px solid #dcdedb; border-radius: 7px; padding: 8px 11px; background: #fbfbfa; min-width: 210px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b918e" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
+          <input placeholder="Search leads, jobs, customers" style="border: 0; outline: none; background: transparent; font-size: 12px; width: 100%; color: #16191a;" />
+        </label>
+        <button style="display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 7px; padding: 9px 14px; font-size: 12px; font-weight: 600; cursor: pointer; background: #1f5f4a; color: #fff;" style-hover="background: #17493a;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          New job
+        </button>
+        <span style="width: 30px; height: 30px; border-radius: 50%; background: #d8ded9; color: #16191a; display: grid; place-items: center; font-size: 11px; font-weight: 650;">AC</span>
+      </div>
+    </header>
+
+    <div style="padding: 24px 26px 60px; display: grid; gap: 18px;">
+
+    <sc-if value="{{ isToday }}" hint-placeholder-val="{{ true }}">
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">New leads today</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">4</div>
+          <div style="font-size: 11px; color: #7b817e; margin-top: 4px;">2 from the booking form</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Jobs scheduled</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">3</div>
+          <div style="font-size: 11px; color: #7b817e; margin-top: 4px;">First arrival 08:30</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Quotes awaiting reply</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">6</div>
+          <div style="font-size: 11px; color: #b4622a; margin-top: 4px;">2 older than 48 hours</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Unpaid invoices</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">$1,485</div>
+          <div style="font-size: 11px; color: #7b817e; margin-top: 4px;">Across 5 invoices</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start;">
+        <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+          <div style="padding: 14px 18px; border-bottom: 1px solid #edeeea; display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="font-size: 13px; font-weight: 650; margin: 0;">Today's route</h2>
+            <span style="font-size: 11px; color: #7b817e;">Friday 28 August 2026</span>
+          </div>
+          <div style="display: grid;">
+            <sc-for list="{{ route }}" as="stop" hint-placeholder-count="3">
+              <div style="display: grid; grid-template-columns: 66px 1fr auto; gap: 14px; align-items: center; padding: 15px 18px; border-bottom: 1px solid #f2f3f0;">
+                <span style="font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; color: #16191a;">{{ stop.time }}</span>
+                <span style="display: grid; gap: 3px; min-width: 0;">
+                  <span style="font-size: 13px; font-weight: 600;">{{ stop.customer }}</span>
+                  <span style="font-size: 11px; color: #7b817e;">{{ stop.detail }}</span>
+                </span>
+                <span style="{{ stop.badge }}">{{ stop.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+          <div style="padding: 14px 18px; border-bottom: 1px solid #edeeea;">
+            <h2 style="font-size: 13px; font-weight: 650; margin: 0;">Needs attention</h2>
+          </div>
+          <div style="display: grid;">
+            <div style="padding: 14px 18px; border-bottom: 1px solid #f2f3f0; display: grid; gap: 4px;">
+              <span style="font-size: 12px; font-weight: 600;">Quote #Q-1043 unanswered 3 days</span>
+              <span style="font-size: 11px; color: #7b817e;">Marcus Hill &middot; Full detail &middot; $389</span>
+            </div>
+            <div style="padding: 14px 18px; border-bottom: 1px solid #f2f3f0; display: grid; gap: 4px;">
+              <span style="font-size: 12px; font-weight: 600;">Lakewood page missing meta description</span>
+              <span style="font-size: 11px; color: #7b817e;">/service-area/lakewood-oh</span>
+            </div>
+            <div style="padding: 14px 18px; border-bottom: 1px solid #f2f3f0; display: grid; gap: 4px;">
+              <span style="font-size: 12px; font-weight: 600;">Review awaiting approval before publish</span>
+              <span style="font-size: 11px; color: #7b817e;">Submitted by Dylan J. &middot; 5 stars</span>
+            </div>
+            <div style="padding: 14px 18px; display: grid; gap: 4px;">
+              <span style="font-size: 12px; font-weight: 600;">Invoice #INV-2210 overdue 9 days</span>
+              <span style="font-size: 11px; color: #7b817e;">$249 &middot; reminder not yet sent</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLeads }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <span style="font-size: 11px; color: #7b817e;">Pipeline</span>
+        <span style="border: 1px solid #dcdedb; border-radius: 999px; padding: 6px 12px; font-size: 11px; background: #fff;">New 4</span>
+        <span style="border: 1px solid #dcdedb; border-radius: 999px; padding: 6px 12px; font-size: 11px; background: #fff;">Quoted 6</span>
+        <span style="border: 1px solid #dcdedb; border-radius: 999px; padding: 6px 12px; font-size: 11px; background: #fff;">Scheduled 3</span>
+        <span style="border: 1px solid #dcdedb; border-radius: 999px; padding: 6px 12px; font-size: 11px; background: #fff;">Won 41</span>
+        <span style="border: 1px solid #dcdedb; border-radius: 999px; padding: 6px 12px; font-size: 11px; background: #fff;">Lost 7</span>
+      </div>
+      <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.1fr 0.8fr 0.8fr 0.7fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid #e6e7e3; background: #f8f9f7; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7b817e; font-weight: 600;">
+          <span>Customer</span><span>Service</span><span>Vehicle &amp; city</span><span>Source</span><span>Value</span><span>Stage</span>
+        </div>
+        <sc-for list="{{ leads }}" as="lead" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.1fr 0.8fr 0.8fr 0.7fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f2f3f0; align-items: center; font-size: 12px;">
+            <span style="display: grid; gap: 3px; min-width: 0;">
+              <span style="font-weight: 600;">{{ lead.name }}</span>
+              <span style="font-size: 11px; color: #7b817e;">{{ lead.phone }}</span>
+            </span>
+            <span>{{ lead.service }}</span>
+            <span style="display: grid; gap: 3px; min-width: 0;">
+              <span>{{ lead.vehicle }}</span>
+              <span style="font-size: 11px; color: #7b817e;">{{ lead.city }}</span>
+            </span>
+            <span style="font-size: 11px; color: #7b817e;">{{ lead.source }}</span>
+            <span style="font-variant-numeric: tabular-nums; font-weight: 600;">{{ lead.value }}</span>
+            <span style="{{ lead.badge }}">{{ lead.stage }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isJobs }}" hint-placeholder-val="{{ false }}">
+      <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+        <div style="padding: 14px 18px; border-bottom: 1px solid #edeeea; display: flex; align-items: center; justify-content: space-between;">
+          <h2 style="font-size: 13px; font-weight: 650; margin: 0;">Week of 24 August</h2>
+          <div style="display: flex; gap: 6px;">
+            <span style="border: 1px solid #dcdedb; border-radius: 6px; padding: 5px 10px; font-size: 11px;">Antonio</span>
+            <span style="border: 1px solid #dcdedb; border-radius: 6px; padding: 5px 10px; font-size: 11px; color: #7b817e;">Crew 2</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 58px repeat(5, minmax(0, 1fr)); border-bottom: 1px solid #e6e7e3; background: #f8f9f7; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7b817e; font-weight: 600;">
+          <span style="padding: 10px 12px;"></span>
+          <span style="padding: 10px 12px;">Mon 24</span>
+          <span style="padding: 10px 12px;">Tue 25</span>
+          <span style="padding: 10px 12px;">Wed 26</span>
+          <span style="padding: 10px 12px;">Thu 27</span>
+          <span style="padding: 10px 12px;">Fri 28</span>
+        </div>
+        <sc-for list="{{ slots }}" as="slot" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 58px repeat(5, minmax(0, 1fr)); border-bottom: 1px solid #f2f3f0; min-height: 74px;">
+            <span style="padding: 10px 12px; font-size: 11px; color: #7b817e; font-variant-numeric: tabular-nums; border-right: 1px solid #f2f3f0;">{{ slot.hour }}</span>
+            <span style="padding: 7px; border-right: 1px solid #f2f3f0;"><span style="{{ slot.a }}">{{ slot.aText }}</span></span>
+            <span style="padding: 7px; border-right: 1px solid #f2f3f0;"><span style="{{ slot.b }}">{{ slot.bText }}</span></span>
+            <span style="padding: 7px; border-right: 1px solid #f2f3f0;"><span style="{{ slot.c }}">{{ slot.cText }}</span></span>
+            <span style="padding: 7px; border-right: 1px solid #f2f3f0;"><span style="{{ slot.d }}">{{ slot.dText }}</span></span>
+            <span style="padding: 7px;"><span style="{{ slot.e }}">{{ slot.eText }}</span></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isInvoices }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Collected this month</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">$7,240</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Outstanding</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">$1,485</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Average ticket</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">$268</div>
+        </div>
+      </div>
+      <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 0.7fr 1.2fr 1fr 0.7fr 0.8fr 0.8fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid #e6e7e3; background: #f8f9f7; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7b817e; font-weight: 600;">
+          <span>Invoice</span><span>Customer</span><span>Service</span><span>Amount</span><span>Issued</span><span>Status</span>
+        </div>
+        <sc-for list="{{ invoices }}" as="inv" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 0.7fr 1.2fr 1fr 0.7fr 0.8fr 0.8fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f2f3f0; align-items: center; font-size: 12px;">
+            <span style="font-variant-numeric: tabular-nums; color: #7b817e;">{{ inv.id }}</span>
+            <span style="font-weight: 600;">{{ inv.customer }}</span>
+            <span>{{ inv.service }}</span>
+            <span style="font-variant-numeric: tabular-nums; font-weight: 600;">{{ inv.amount }}</span>
+            <span style="font-size: 11px; color: #7b817e;">{{ inv.issued }}</span>
+            <span style="{{ inv.badge }}">{{ inv.status }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isCustomers }}" hint-placeholder-val="{{ false }}">
+      <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr 1.2fr 0.7fr 0.8fr 0.7fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid #e6e7e3; background: #f8f9f7; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7b817e; font-weight: 600;">
+          <span>Customer</span><span>City</span><span>Vehicles on file</span><span>Visits</span><span>Lifetime</span><span>Last seen</span>
+        </div>
+        <sc-for list="{{ customers }}" as="c" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 1.1fr 1fr 1.2fr 0.7fr 0.8fr 0.7fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f2f3f0; align-items: center; font-size: 12px;">
+            <span style="display: grid; gap: 3px; min-width: 0;">
+              <span style="font-weight: 600;">{{ c.name }}</span>
+              <span style="font-size: 11px; color: #7b817e;">{{ c.phone }}</span>
+            </span>
+            <span>{{ c.city }}</span>
+            <span style="font-size: 11px; color: #4d5350; line-height: 1.45;">{{ c.vehicles }}</span>
+            <span style="font-variant-numeric: tabular-nums;">{{ c.visits }}</span>
+            <span style="font-variant-numeric: tabular-nums; font-weight: 600;">{{ c.lifetime }}</span>
+            <span style="font-size: 11px; color: #7b817e;">{{ c.last }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isContent }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: start;">
+        <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+          <div style="padding: 12px 16px; border-bottom: 1px solid #edeeea; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #7b817e; font-weight: 600;">Homepage sections</div>
+          <div style="display: grid;">
+            <sc-for list="{{ sections }}" as="s" hint-placeholder-count="7">
+              <div style="padding: 12px 16px; border-bottom: 1px solid #f2f3f0; display: flex; align-items: center; gap: 10px; font-size: 12px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #c4c8c4;"></span>
+                <span style="min-width: 0;">{{ s.name }}</span>
+                <span style="margin-left: auto; font-size: 10px; color: #9aa09d;">{{ s.fields }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding: 12px 16px; font-size: 10px; line-height: 1.5; color: #9aa09d;">Section order and structure are fixed and cannot be reordered from the admin.</div>
+        </section>
+
+        <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+          <div style="padding: 14px 18px; border-bottom: 1px solid #edeeea; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+            <h2 style="font-size: 13px; font-weight: 650; margin: 0;">Hero &mdash; content fields</h2>
+            <span style="font-size: 10px; border: 1px solid #dcdedb; border-radius: 999px; padding: 3px 9px; color: #7b817e;">Component: HeroPanel</span>
+            <button style="margin-left: auto; border: 0; border-radius: 7px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; background: #1f5f4a; color: #fff;" style-hover="background: #17493a;">Save changes</button>
+          </div>
+
+          <div style="padding: 18px; display: grid; gap: 16px;">
+            <label style="display: grid; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #4d5350;">Headline</span>
+              <input value="All Things Fresh." style="width: 100%; padding: 10px 12px; border: 1px solid #dcdedb; border-radius: 7px; font-size: 13px; background: #fff;" />
+              <span style="font-size: 10px; color: #9aa09d;">Renders in the approved Alex Brush wordmark treatment. Type style is not editable.</span>
+            </label>
+            <label style="display: grid; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #4d5350;">Supporting line</span>
+              <textarea rows="2" style="width: 100%; padding: 10px 12px; border: 1px solid #dcdedb; border-radius: 7px; font-size: 13px; background: #fff; resize: vertical;">Professional mobile detailing that comes to you. A clean car changes the way your whole day feels.</textarea>
+            </label>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+              <label style="display: grid; gap: 6px;">
+                <span style="font-size: 11px; font-weight: 600; color: #4d5350;">Happy customers count</span>
+                <input value="+500" style="width: 100%; padding: 10px 12px; border: 1px solid #dcdedb; border-radius: 7px; font-size: 13px; background: #fff;" />
+              </label>
+              <label style="display: grid; gap: 6px;">
+                <span style="font-size: 11px; font-weight: 600; color: #4d5350;">Phone number</span>
+                <input value="440-841-8189" style="width: 100%; padding: 10px 12px; border: 1px solid #dcdedb; border-radius: 7px; font-size: 13px; background: #fff;" />
+              </label>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+              <div style="display: grid; gap: 6px;">
+                <span style="font-size: 11px; font-weight: 600; color: #4d5350;">Before image</span>
+                <div style="display: flex; align-items: center; gap: 12px; border: 1px dashed #cfd2ce; border-radius: 8px; padding: 12px;">
+                  <span style="width: 46px; height: 34px; border-radius: 5px; background: #e6e8e5;"></span>
+                  <span style="display: grid; gap: 2px; min-width: 0;">
+                    <span style="font-size: 11px; font-weight: 600;">car-dirty-c.png</span>
+                    <span style="font-size: 10px; color: #9aa09d;">Replace &middot; must be transparent PNG</span>
+                  </span>
+                </div>
+              </div>
+              <div style="display: grid; gap: 6px;">
+                <span style="font-size: 11px; font-weight: 600; color: #4d5350;">After image</span>
+                <div style="display: flex; align-items: center; gap: 12px; border: 1px dashed #cfd2ce; border-radius: 8px; padding: 12px;">
+                  <span style="width: 46px; height: 34px; border-radius: 5px; background: #e6e8e5;"></span>
+                  <span style="display: grid; gap: 2px; min-width: 0;">
+                    <span style="font-size: 11px; font-weight: 600;">car-clean-c.png</span>
+                    <span style="font-size: 10px; color: #9aa09d;">Replace &middot; same crop and aspect as before image</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #edeeea; background: #f8f9f7; padding: 16px 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b918e" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              <span style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #7b817e; font-weight: 600;">Locked by design freeze</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 7px;">
+              <sc-for list="{{ locked }}" as="l" hint-placeholder-count="12">
+                <span style="border: 1px solid #e1e2de; border-radius: 999px; padding: 5px 11px; font-size: 11px; color: #a2a8a5; background: #fff; text-decoration: line-through;">{{ l }}</span>
+              </sc-for>
+            </div>
+            <div style="font-size: 10px; line-height: 1.55; color: #9aa09d; margin-top: 12px; max-width: 620px;">These controls are not rendered in the admin at all. Changing any of them requires a code change plus a passing visual-regression run.</div>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSeo }}" hint-placeholder-val="{{ false }}">
+      <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.5fr 0.9fr 1.6fr 0.6fr 0.7fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid #e6e7e3; background: #f8f9f7; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7b817e; font-weight: 600;">
+          <span>URL</span><span>Template</span><span>Title tag</span><span>Meta</span><span>Status</span>
+        </div>
+        <sc-for list="{{ pages }}" as="p" hint-placeholder-count="8">
+          <div style="display: grid; grid-template-columns: 1.5fr 0.9fr 1.6fr 0.6fr 0.7fr; gap: 12px; padding: 13px 18px; border-bottom: 1px solid #f2f3f0; align-items: center; font-size: 12px;">
+            <span style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #4d5350; min-width: 0; overflow-wrap: anywhere;">{{ p.url }}</span>
+            <span style="font-size: 11px; color: #7b817e;">{{ p.template }}</span>
+            <span style="min-width: 0; overflow-wrap: anywhere;">{{ p.title }}</span>
+            <span style="{{ p.metaBadge }}">{{ p.meta }}</span>
+            <span style="{{ p.badge }}">{{ p.status }}</span>
+          </div>
+        </sc-for>
+      </section>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Published URLs</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">64</div>
+          <div style="font-size: 11px; color: #7b817e; margin-top: 4px;">4 templates &middot; 0 custom layouts</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Missing metadata</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">3</div>
+          <div style="font-size: 11px; color: #b4622a; margin-top: 4px;">All location pages</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; padding: 16px 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b918e; font-weight: 600;">Duplicate-content flags</div>
+          <div style="font-size: 27px; font-weight: 650; letter-spacing: -0.03em; margin-top: 8px; font-variant-numeric: tabular-nums;">2</div>
+          <div style="font-size: 11px; color: #7b817e; margin-top: 4px;">Berea and Brook Park bodies overlap</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStaff }}" hint-placeholder-val="{{ false }}">
+      <section style="background: #fff; border: 1px solid #e1e2de; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.1fr 0.9fr 2.2fr; gap: 12px; padding: 11px 18px; border-bottom: 1px solid #e6e7e3; background: #f8f9f7; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7b817e; font-weight: 600;">
+          <span>Person</span><span>Role</span><span>Can do</span>
+        </div>
+        <sc-for list="{{ staff }}" as="s" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 1.1fr 0.9fr 2.2fr; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f2f3f0; align-items: start; font-size: 12px;">
+            <span style="display: grid; gap: 3px;">
+              <span style="font-weight: 600;">{{ s.name }}</span>
+              <span style="font-size: 11px; color: #7b817e;">{{ s.email }}</span>
+            </span>
+            <span style="font-size: 11px; color: #4d5350;">{{ s.role }}</span>
+            <span style="font-size: 11px; color: #4d5350; line-height: 1.55;">{{ s.can }}</span>
+          </div>
+        </sc-for>
+        <div style="padding: 14px 18px; font-size: 11px; line-height: 1.6; color: #7b817e; background: #f8f9f7;">No role in this system can edit typography, colour, spacing, layout, section order, custom CSS or custom JavaScript. Those live in code and are gated behind visual-regression tests.</div>
+      </section>
+    </sc-if>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+const VIEWS = {
+  today: ['Today', 'Friday 28 August 2026 · 3 jobs scheduled'],
+  leads: ['Leads & quotes', '61 records · 4 need a first reply'],
+  jobs: ['Jobs & schedule', 'Week of 24 August · 2 crews'],
+  invoices: ['Invoices & payments', 'August 2026 · $1,485 outstanding'],
+  customers: ['Customers & vehicles', '218 customers · 264 vehicles on file'],
+  content: ['Content fields', 'Structured fields bound to approved components'],
+  seo: ['SEO & pages', '64 URLs across 4 approved templates'],
+  staff: ['Staff & permissions', '4 users · no design permissions granted'],
+};
+
+const badge = (text, bg, fg) =>
+  'display: inline-flex; align-items: center; justify-self: start; border-radius: 999px; padding: 4px 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; background: ' + bg + '; color: ' + fg + ';';
+
+const B = {
+  ok: badge('', '#e2f1ea', '#1f5f4a'),
+  warn: badge('', '#fbeee0', '#a35d21'),
+  info: badge('', '#e5ecf5', '#2d5580'),
+  mute: badge('', '#eceeeb', '#6b716e'),
+  bad: badge('', '#f8e5e3', '#9c3a30'),
+};
+
+const ROUTE = [
+  ['08:30', 'Karen Mueller', 'Interior deep clean · Rocky River · Honda CR-V', 'On site', B.ok],
+  ['11:30', 'Marcus Hill', 'Full detail · Parma · Chevy Silverado', 'Next', B.info],
+  ['15:00', 'Priya Raman', 'Exterior detail · Lakewood · Subaru Outback', 'Confirmed', B.mute],
+];
+
+const LEADS = [
+  ['Devon Clarke', '(440) 555-0182', 'Full detail', '2021 Ford Explorer', 'Westlake', 'Booking form', '$389', 'New', B.info],
+  ['Aisha Bell', '(216) 555-0114', 'Interior deep clean', '2018 Toyota Camry', 'Lakewood', 'Google', '$249', 'New', B.info],
+  ['Tom Vasquez', '(440) 555-0177', 'Exterior detail', '2015 Ram 1500', 'Berea', 'Instagram', '$189', 'Quoted', B.warn],
+  ['Nina Petrov', '(216) 555-0139', 'Restoration clean', '2012 Honda Odyssey', 'Parma', 'Referral', '$540', 'Quoted', B.warn],
+  ['Greg Lindsay', '(440) 555-0155', 'Full detail', '2019 Boat trailer', 'Avon Lake', 'Phone', '$620', 'Scheduled', B.ok],
+  ['Marisol Ruiz', '(216) 555-0166', 'Interior refresh', '2020 Kia Sportage', 'Cleveland Heights', 'Booking form', '$149', 'Won', B.ok],
+];
+
+const SLOTS = [
+  ['08:00', 'Karen M. · Interior', 'Blocked · travel', '', 'Fleet · 3 vans', 'Karen M. · Interior'],
+  ['11:00', '', 'Nina P. · Restoration', 'Tom V. · Exterior', '', 'Marcus H. · Full'],
+  ['14:00', 'Greg L. · Boat', '', 'Marisol R. · Interior', 'Devon C. · Full', 'Priya R. · Exterior'],
+  ['17:00', '', '', '', 'Buffer', ''],
+];
+
+const INVOICES = [
+  ['INV-2214', 'Marisol Ruiz', 'Interior refresh', '$149', '26 Aug', 'Paid', B.ok],
+  ['INV-2213', 'Greg Lindsay', 'Boat full detail', '$620', '25 Aug', 'Paid', B.ok],
+  ['INV-2212', 'Karen Mueller', 'Interior deep clean', '$249', '24 Aug', 'Sent', B.info],
+  ['INV-2211', 'Tom Vasquez', 'Exterior detail', '$189', '21 Aug', 'Sent', B.info],
+  ['INV-2210', 'Nina Petrov', 'Restoration clean', '$249', '19 Aug', 'Overdue 9d', B.bad],
+  ['INV-2209', 'Devon Clarke', 'Full detail', '$389', '18 Aug', 'Partially paid', B.warn],
+];
+
+const CUSTOMERS = [
+  ['Karen Mueller', '(440) 555-0121', 'Rocky River', '2019 Honda CR-V · 2014 Mazda 3', '6', '$1,340', '28 Aug'],
+  ['Marcus Hill', '(216) 555-0198', 'Parma', '2016 Chevy Silverado', '3', '$980', '28 Aug'],
+  ['Priya Raman', '(440) 555-0143', 'Lakewood', '2022 Subaru Outback', '4', '$760', '28 Aug'],
+  ['Greg Lindsay', '(440) 555-0155', 'Avon Lake', 'Boat · 2018 F-150', '2', '$1,240', '25 Aug'],
+  ['Marisol Ruiz', '(216) 555-0166', 'Cleveland Heights', '2020 Kia Sportage', '1', '$149', '26 Aug'],
+  ['Nina Petrov', '(216) 555-0139', 'Parma', '2012 Honda Odyssey', '2', '$498', '19 Aug'],
+];
+
+const SECTIONS = [
+  ['Hero', '6 fields'],
+  ['Feel fresh intro', '5 fields'],
+  ['Video', '3 fields'],
+  ['Services', '12 fields'],
+  ['Service area', '9 fields'],
+  ['Reviews', 'linked'],
+  ['Before and after', '3 fields'],
+  ['Social work', 'linked'],
+  ['Booking', '4 fields'],
+  ['Closing CTA', '3 fields'],
+  ['Footer', '11 fields'],
+];
+
+const LOCKED = ['Font family', 'Font size', 'Font weight', 'Letter spacing', 'Text colour', 'Background colour', 'Gradient', 'Padding', 'Margin', 'Gap', 'Container width', 'Border', 'Corner radius', 'Shadow', 'Grid columns', 'Breakpoints', 'Section order', 'Element position', 'Animation timing', 'Custom CSS', 'Custom JavaScript', 'Theme'];
+
+const PAGES = [
+  ['/', 'Homepage', 'Mobile Car Detailing Cleveland OH | All Things Fresh', 'Set', 'Live'],
+  ['/services/interior-detailing', 'Service', 'Interior Car Detailing Cleveland | All Things Fresh', 'Set', 'Live'],
+  ['/services/exterior-detailing', 'Service', 'Exterior Car Detailing Cleveland | All Things Fresh', 'Set', 'Live'],
+  ['/services/full-detail', 'Service', 'Full Car Detail Cleveland OH | All Things Fresh', 'Set', 'Live'],
+  ['/service-area/lakewood-oh', 'Location', 'Mobile Car Detailing in Lakewood, OH', 'Missing', 'Live'],
+  ['/service-area/parma-oh', 'Location', 'Mobile Car Detailing in Parma, OH', 'Missing', 'Draft'],
+  ['/resources/how-often-to-detail-a-car-in-ohio', 'Resource', 'How Often Should You Detail a Car in Ohio?', 'Set', 'Live'],
+  ['/our-work/2016-silverado-full-detail-parma', 'Case study', '2016 Silverado Full Detail, Parma OH', 'Set', 'Live'],
+];
+
+const STAFF = [
+  ['Antonio (owner)', 'antonio@atfdetailing.com', 'Owner', 'Everything operational, all content fields, SEO metadata, invoicing, payments, staff management.'],
+  ['Khurram', 'khurram@example.com', 'SEO editor', 'Title tags, meta descriptions, structured data, redirects, resource articles, location page copy. No pricing, no customer data.'],
+  ['Crew 2 lead', 'crew2@atfdetailing.com', 'Technician', 'Own schedule, job notes, before and after photos, mark jobs complete. No pricing, no content, no customer export.'],
+  ['Bookkeeper', 'books@example.com', 'Finance', 'Invoices, payments, refunds, exports. No content, no SEO, no customer messaging.'],
+];
+
+class Component extends DCLogic {
+  state = { view: 'today' };
+
+  navStyle(active) {
+    return 'display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; border-radius: 7px; padding: 9px 8px; font-size: 12px; cursor: pointer; font-family: inherit; transition: background .15s ease, color .15s ease; background: ' +
+      (active ? '#242829' : 'transparent') + '; color: ' + (active ? '#fff' : '#a5aeaa') + ';';
+  }
+
+  dotStyle(active) {
+    return 'width: 5px; height: 5px; border-radius: 50%; flex: 0 0 5px; background: ' + (active ? '#45c08d' : '#4a5251') + ';';
+  }
+
+  go(v) { return () => this.setState({ view: v }); }
+
+  slotCell(text) {
+    if (!text) return 'display: none;';
+    const muted = /Blocked|Buffer/.test(text);
+    return 'display: block; border-radius: 6px; padding: 8px 9px; font-size: 11px; line-height: 1.35; background: ' +
+      (muted ? '#f1f2ef' : '#e2f1ea') + '; color: ' + (muted ? '#8b918e' : '#1f5f4a') + '; border-left: 2px solid ' + (muted ? '#cdd0cc' : '#1f5f4a') + ';';
+  }
+
+  renderVals() {
+    const v = this.state.view;
+    const meta = VIEWS[v] || VIEWS.today;
+    const nav = {};
+    Object.keys(VIEWS).forEach((k) => {
+      const cap = k.charAt(0).toUpperCase() + k.slice(1);
+      nav['nav' + cap] = this.navStyle(v === k);
+      nav['dot' + cap] = this.dotStyle(v === k);
+      nav['go' + cap] = this.go(k);
+    });
+
+    return Object.assign(nav, {
+      viewTitle: meta[0],
+      viewSubtitle: meta[1],
+      isToday: v === 'today',
+      isLeads: v === 'leads',
+      isJobs: v === 'jobs',
+      isInvoices: v === 'invoices',
+      isCustomers: v === 'customers',
+      isContent: v === 'content',
+      isSeo: v === 'seo',
+      isStaff: v === 'staff',
+      route: ROUTE.map(([time, customer, detail, status, badgeStyle]) => ({ time, customer, detail, status, badge: badgeStyle })),
+      leads: LEADS.map(([name, phone, service, vehicle, city, source, value, stage, badgeStyle]) => ({ name, phone, service, vehicle, city, source, value, stage, badge: badgeStyle })),
+      slots: SLOTS.map(([hour, a, b, c, d, e]) => ({
+        hour, aText: a, bText: b, cText: c, dText: d, eText: e,
+        a: this.slotCell(a), b: this.slotCell(b), c: this.slotCell(c), d: this.slotCell(d), e: this.slotCell(e),
+      })),
+      invoices: INVOICES.map(([id, customer, service, amount, issued, status, badgeStyle]) => ({ id, customer, service, amount, issued, status, badge: badgeStyle })),
+      customers: CUSTOMERS.map(([name, phone, city, vehicles, visits, lifetime, last]) => ({ name, phone, city, vehicles, visits, lifetime, last })),
+      sections: SECTIONS.map(([name, fields]) => ({ name, fields })),
+      locked: LOCKED,
+      pages: PAGES.map(([url, template, title, m, status]) => ({
+        url, template, title, meta: m, status,
+        metaBadge: m === 'Set' ? B.ok : B.bad,
+        badge: status === 'Live' ? B.ok : B.mute,
+      })),
+      staff: STAFF.map(([name, email, role, can]) => ({ name, email, role, can })),
+    });
+  }
+}
+</script>
+</body>
+</html>

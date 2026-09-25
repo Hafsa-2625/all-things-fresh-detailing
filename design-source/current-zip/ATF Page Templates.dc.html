@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&display=swap" rel="stylesheet" />
+<style>
+  html { scroll-behavior: smooth; background: #fff; }
+  body { margin: 0; background: #fff; color: #050505; font-family: Arial, Helvetica, sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: #050505; }
+  button, input, select, textarea { font: inherit; box-sizing: border-box; }
+  @keyframes atf-float-logo {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(1.5deg) rotateY(-2deg); }
+    50% { transform: translate3d(0, -13px, 18px) rotateX(-1.5deg) rotateY(2deg); }
+  }
+  @keyframes atf-float-shadow {
+    0%, 100% { opacity: 0.18; transform: scaleX(0.86); }
+    50% { opacity: 0.1; transform: scaleX(0.72); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .atf-float-logo, .atf-float-shadow { animation: none !important; transform: none !important; }
+  }
+</style>
+</helmet>
+
+<div style="background: #101112; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; padding: 14px 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; position: sticky; top: 0; z-index: 40;">
+  <span style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #7d8a86;">Template preview harness &mdash; not part of the public site</span>
+  <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+    <button onClick="{{ pickService }}" style="{{ tabService }}">T1 &middot; Service</button>
+    <button onClick="{{ pickLocation }}" style="{{ tabLocation }}">T2 &middot; Location</button>
+    <button onClick="{{ pickArticle }}" style="{{ tabArticle }}">T3 &middot; Resource</button>
+    <button onClick="{{ pickCase }}" style="{{ tabCase }}">T4 &middot; Case study</button>
+  </div>
+  <span style="margin-left: auto; font-size: 11px; color: #cfd8d5;">{{ routePattern }}</span>
+</div>
+
+<main id="top" style="position: relative; overflow-x: hidden;">
+
+<section style="background: #fff; padding: 0;">
+  <div style="position: relative; border-radius: 20px; overflow: hidden; background: radial-gradient(ellipse 74% 82% at 50% 44%, #ffffff 0%, #fdfdfc 48%, #f8f7f5 76%, #f2f0ed 100%); padding: max(130px, calc(3% + clamp(150px, 13vw, 230px) / 1.668 + 30px)) 3.5% 66px;">
+
+    <header style="position: absolute; z-index: 10; top: 0; left: 0; right: 0; display: flex; align-items: flex-start; justify-content: space-between;">
+      <a href="#top" style="display: block; padding: 3% 0 0 2.5%;">
+        <img src="assets/atf-logo-transparent.webp" alt="All Things Fresh Auto Detailing" style="display: block; width: clamp(150px, 13vw, 230px); height: auto; object-fit: contain; background: transparent; border: 0; border-radius: 0; box-shadow: none; filter: drop-shadow(0 8px 14px rgba(20,26,40,0.16));" />
+      </a>
+      <nav style="display: flex; align-items: center; gap: 4px; padding: 12px 14px 15px 24px; border-radius: 0 20px 0 28px; background: #fffefc; box-shadow: -6px 6px 20px rgba(20,26,40,0.06);">
+        <a href="#top" style="padding: 10px 18px; border-radius: 999px; background: #2c3033; color: #fff; font-size: 13px; font-weight: 700;">Home</a>
+        <a href="#services" style="padding: 10px 13px; font-size: 13px; color: #4a4540;">Services</a>
+        <a href="#work" style="padding: 10px 13px; font-size: 13px; color: #4a4540;">Our Work</a>
+        <a href="#reviews" style="padding: 10px 13px; font-size: 13px; color: #4a4540;">Reviews</a>
+        <a href="#book" style="padding: 10px 13px; font-size: 13px; color: #4a4540;">Book</a>
+        <a href="tel:4408418189" style="padding: 10px 13px; font-size: 13px; font-weight: 700; color: #4a4540;">440-841-8189</a>
+        <button onClick="{{ openBooking }}" style="display: inline-flex; align-items: center; gap: 9px; border: 0; border-radius: 999px; padding: 5px 20px 5px 5px; font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; background: #0b0b0b; color: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease;" style-hover="transform: translateY(-2px); box-shadow: 0 10px 22px rgba(11,11,11,0.25);">
+          <span style="width: 30px; height: 30px; border-radius: 50%; background: #fff; color: #0b0b0b; display: grid; place-items: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </span>
+          Contact
+        </button>
+      </nav>
+    </header>
+
+    <div style="width: min(100%, 1120px); margin: auto;">
+      <sc-if value="{{ isService }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width: 720px;">
+          <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">Services &middot; Interior</p>
+          <h1 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0 0 22px; font-weight: 700;">Interior detailing,<br /><span style="color: #888;">at your driveway.</span></h1>
+          <p style="color: #4f4f4f; font-size: 16px; line-height: 1.5; max-width: 420px; margin: 0 0 30px;">A full reset of every surface inside your vehicle. We bring our own water, power, and products, so nothing is needed from you.</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isLocation }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width: 720px;">
+          <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">Service area &middot; Cuyahoga County</p>
+          <h1 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0 0 22px; font-weight: 700;">Mobile detailing<br /><span style="color: #888;">in Lakewood, Ohio.</span></h1>
+          <p style="color: #4f4f4f; font-size: 16px; line-height: 1.5; max-width: 440px; margin: 0 0 30px;">We detail on Lakewood streets and in apartment lots every week, from the Gold Coast high-rises down to Birdtown. Tight driveways and street parking are normal here, and we are set up for both.</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isArticle }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width: 720px;">
+          <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">Resources &middot; Seasonal care</p>
+          <h1 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0 0 22px; font-weight: 700;">How often to detail<br /><span style="color: #888;">a car in Ohio.</span></h1>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 18px; color: #8a8a8a; font-size: 12px;">
+            <span>Updated 14 August 2026</span>
+            <span>&middot;</span>
+            <span>6 minute read</span>
+            <span>&middot;</span>
+            <span>Written by All Things Fresh</span>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isCase }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width: 720px;">
+          <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">Our work &middot; Full detail</p>
+          <h1 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0 0 22px; font-weight: 700;">2016 Silverado,<br /><span style="color: #888;">three winters of salt.</span></h1>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 18px; color: #8a8a8a; font-size: 12px;">
+            <span>Parma, OH</span>
+            <span>&middot;</span>
+            <span>Full detail</span>
+            <span>&middot;</span>
+            <span>4 hours on site</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 30px;">
+        <button onClick="{{ openBooking }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 999px; padding: 14px 21px; font-size: 12px; font-weight: 700; cursor: pointer; background: #050505; color: #fff; transition: transform 0.2s ease;" style-hover="transform: translateY(-2px);">
+          Book your appointment
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <a href="tel:4408418189" style="display: inline-flex; align-items: center; gap: 8px; border-bottom: 1px solid currentColor; padding-bottom: 5px; font-size: 12px; font-weight: 700;">
+          Or call 440-841-8189
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<sc-if value="{{ isService }}" hint-placeholder-val="{{ true }}">
+
+<section style="padding: 70px 30px 90px;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 14%; align-items: start; margin-bottom: 50px;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">What is<br />included.</h2>
+      <p style="color: #4f4f4f; font-size: 16px; line-height: 1.5; max-width: 380px; margin: 4px 0 0;">Every interior detail covers the same checklist. Heavier jobs take longer, they do not get less attention.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;">
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Full vacuum, seats out of the way</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Carpets, mats, seat rails, trunk, and under the seats.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Steam and extraction</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Hot water extraction on cloth, spot treatment on stains.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Leather cleaned and conditioned</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">pH-balanced cleaner, then a matte conditioner.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Every hard surface wiped</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Dash, vents, console, door cards, cupholders, and jambs.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Glass, inside and edges</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Streak-free, including the top edge you cannot reach.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Walk-around before we leave</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">We go over the finish together and fix anything you spot.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="services" style="padding: 100px 30px; background: #050505; color: #fff;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 65px;">
+      <h2 style="font-size: clamp(44px, 5vw, 70px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">Pick your<br /><span style="color: #888;">interior package.</span></h2>
+      <p style="color: #999; max-width: 200px; font-size: 13px; line-height: 1.5; margin: 0;">Pricing is by vehicle size and condition. Quote confirmed before we start.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+      <article style="border: 1px solid #242424; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; background: #0e0e0e;">
+        <div style="padding: 24px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
+          <span style="font-size: 11px; color: #8c8c8c;">01</span>
+          <h3 style="font-size: 24px; letter-spacing: -0.05em; margin: 0;">Interior refresh</h3>
+          <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">from $149</div>
+          <p style="font-size: 12px; line-height: 1.5; color: #8f8f8f; margin: 0; flex: 1;">Vacuum, wipe-down, glass, and mats. Around two hours for a normally used car.</p>
+          <button onClick="{{ openBooking }}" style="margin-top: 8px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; padding: 17px 22px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; background: #fff; color: #050505; transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;" style-hover="transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 34px rgba(255,255,255,0.18); background: #d9f5ff;">
+            Book service
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </article>
+      <article style="border: 1px solid #242424; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; background: linear-gradient(145deg, #d9f5ff, #fff); color: #050505;">
+        <div style="padding: 24px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
+          <span style="font-size: 11px; color: #8c8c8c;">02</span>
+          <h3 style="font-size: 24px; letter-spacing: -0.05em; margin: 0;">Interior deep clean</h3>
+          <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">from $249</div>
+          <p style="font-size: 12px; line-height: 1.5; color: #555; margin: 0; flex: 1;">Everything above plus steam, hot water extraction, and leather conditioning.</p>
+          <button onClick="{{ openBooking }}" style="margin-top: 8px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; padding: 17px 22px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; background: #050505; color: #fff; transition: transform 0.25s ease, box-shadow 0.25s ease;" style-hover="transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 34px rgba(5,5,5,0.3);">
+            Book service
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </article>
+      <article style="border: 1px solid #242424; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; background: #0e0e0e;">
+        <div style="padding: 24px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
+          <span style="font-size: 11px; color: #8c8c8c;">03</span>
+          <h3 style="font-size: 24px; letter-spacing: -0.05em; margin: 0;">Restoration clean</h3>
+          <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">quoted</div>
+          <p style="font-size: 12px; line-height: 1.5; color: #8f8f8f; margin: 0; flex: 1;">Pet hair, spills, smoke, mold, or an interior that has not been cleaned in years.</p>
+          <button onClick="{{ openBooking }}" style="margin-top: 8px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; padding: 17px 22px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; background: #fff; color: #050505; transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;" style-hover="transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 34px rgba(255,255,255,0.18); background: #d9f5ff;">
+            Request a quote
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section style="padding: 40px 30px 100px; background: #fafafa;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: grid; grid-template-columns: 0.8fr 1fr; gap: 10%; align-items: end; margin-bottom: 45px;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">Add-ons and<br /><span style="color: #888;">common questions.</span></h2>
+      <p style="font-size: 15px; line-height: 1.5; color: #4f4f4f; max-width: 300px; margin: 0;">Add anything to an interior detail while we are already on site.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start;">
+      <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff; display: grid; gap: 18px;">
+        <div style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700;">Add-ons</div>
+        <div style="display: grid; gap: 14px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Pet hair removal</span>
+            <span style="font-size: 14px; color: #747474;">+$40</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Odour treatment</span>
+            <span style="font-size: 14px; color: #747474;">+$60</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Headliner clean</span>
+            <span style="font-size: 14px; color: #747474;">+$45</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Fabric protection</span>
+            <span style="font-size: 14px; color: #747474;">+$75</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Third row seating</span>
+            <span style="font-size: 14px; color: #747474;">+$35</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: grid; gap: 12px; align-content: start;">
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Do you need my water or power?</div>
+          <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 6px;">No. We arrive fully self-contained with our own tank, generator, and products.</div>
+        </div>
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Can you work in an apartment lot?</div>
+          <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 6px;">Yes, as long as we can park beside the vehicle. Tell us the building when you book.</div>
+        </div>
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">How long does the interior stay damp?</div>
+          <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 6px;">Two to four hours after extraction. We leave the windows cracked if the weather allows.</div>
+        </div>
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff;">
+          <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">What if it rains?</div>
+          <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 6px;">Interior work continues in light rain. If it is heavy we reschedule at no charge.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ isLocation }}" hint-placeholder-val="{{ false }}">
+
+<section style="padding: 70px 30px 90px;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 14%; align-items: start;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">Detailing built<br />for Lakewood.</h2>
+      <div style="max-width: 460px;">
+        <p style="color: #4f4f4f; font-size: 16px; line-height: 1.5; margin: 4px 0 16px;">Lakewood is the densest city in Ohio, and it shows in the work. Most of our appointments here are street-side on Clifton, Detroit, or Madison, or in the shared lots behind Gold Coast buildings.</p>
+        <p style="color: #4f4f4f; font-size: 16px; line-height: 1.5; margin: 0;">Cars parked outside all winter come to us with Detroit Avenue road salt in the carpets and a film on the lower panels. Spring brings pollen off the Metroparks tree canopy. We plan the visit around whichever one you are dealing with.</p>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 55px;">
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Street-side friendly</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Our setup fits a single parking space, no driveway needed.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">Salt season specialists</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Extraction on carpets, neutraliser on rocker panels.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong style="font-size: 14px; font-weight: 500;">No travel fee</strong>
+        <span style="grid-column: 2; color: #747474; font-size: 11px; line-height: 1.45;">Lakewood is fifteen minutes from our base.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="area" style="padding: 40px 30px 100px; background: #fafafa;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: grid; grid-template-columns: 0.8fr 1fr; gap: 10%; align-items: end; margin-bottom: 45px;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">Where we park<br /><span style="color: #888;">in Lakewood.</span></h2>
+      <p style="font-size: 15px; line-height: 1.5; color: #4f4f4f; max-width: 300px; margin: 0;">Every neighbourhood in the city, from the lakefront to the Rocky River border.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: stretch;">
+      <div style="border: 1px solid #e8e8e8; border-radius: 12px; overflow: hidden; background: #fff; min-height: 380px;">
+        <iframe title="All Things Fresh service area in Lakewood, Ohio" src="https://www.google.com/maps?q=Lakewood,+Ohio&output=embed" style="width: 100%; height: 100%; min-height: 380px; border: 0; display: block;" loading="lazy"></iframe>
+      </div>
+      <div style="display: grid; gap: 12px; align-content: start;">
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+          <div>
+            <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">15 min</div>
+            <div style="font-size: 11px; color: #8a8a8a; margin-top: 6px; line-height: 1.4;">From our base to Lakewood</div>
+          </div>
+          <div>
+            <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">2-4 hrs</div>
+            <div style="font-size: 11px; color: #8a8a8a; margin-top: 6px; line-height: 1.4;">Typical time on site</div>
+          </div>
+          <div>
+            <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">$0</div>
+            <div style="font-size: 11px; color: #8a8a8a; margin-top: 6px; line-height: 1.4;">Travel fee inside the service area</div>
+          </div>
+        </div>
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff;">
+          <div style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700; margin-bottom: 10px;">Neighbourhoods we detail in</div>
+          <p style="margin: 0; font-size: 12px; line-height: 1.75; color: #5c564f;">Gold Coast &middot; Clifton Park &middot; Edgewater border &middot; Birdtown &middot; Madison Avenue &middot; Detroit Shoreway border &middot; Scenic Park &middot; Downtown Lakewood &middot; Lakewood Park &middot; Cove &middot; West End &middot; Rockport border</p>
+        </div>
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff; display: grid; gap: 18px;">
+          <div style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700;">How the visit works</div>
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">1</span>
+            <div>
+              <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Tell us where the car sits</div>
+              <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">Street, driveway, or building lot. Include the cross street if it is metered.</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">2</span>
+            <div>
+              <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">We arrive fully self-contained</div>
+              <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">Our own water, power, and products. Nothing needed from you.</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">3</span>
+            <div>
+              <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Walk-around before we leave</div>
+              <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">We go over the finish together and fix anything you spot.</div>
+            </div>
+          </div>
+          <a href="tel:4408418189" style="display: inline-flex; align-items: center; gap: 8px; justify-self: start; border-bottom: 1px solid currentColor; padding-bottom: 5px; font-size: 12px; font-weight: 700;">
+            Not sure about parking? Call or text
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="reviews" style="padding: 20px 30px 90px;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 20px 24px; border-radius: 14px; background: #f4f4f4;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px;">
+        <img src="assets/badge-google-verified.png" alt="Google Verified Reviews" style="display: block; height: 54px; width: auto; object-fit: contain;" />
+        <span style="font-size: 15px; font-weight: 700; color: #3d3d3d;">Excellent</span>
+        <span style="display: flex; gap: 2px; color: #f5a623;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+        </span>
+        <span style="font-size: 16px; font-weight: 700; color: #050505;">4.9</span>
+        <span style="font-size: 15px; color: #6d6862;">|</span>
+        <a href="{{ mapsUrl }}" target="_blank" rel="noopener noreferrer" style="font-size: 15px; font-weight: 700; color: #050505;">54 reviews</a>
+      </div>
+      <a href="{{ mapsUrl }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border: 1px solid #d5d3cf; border-radius: 10px; background: #fff; font-size: 14px; font-weight: 700; color: #050505; transition: transform 0.2s ease, box-shadow 0.2s ease;" style-hover="transform: translateY(-2px); box-shadow: 0 10px 22px rgba(20,26,40,0.1); color: #050505;">Write a review</a>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px;">
+      <sc-for list="{{ localReviews }}" as="review" hint-placeholder-count="3">
+        <article style="border-radius: 14px; background: #f4f4f4; padding: 22px; display: flex; flex-direction: column; min-height: 250px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 13px;">
+              <span style="{{ review.avatarStyle }}">{{ review.initial }}</span>
+              <span>
+                <span style="display: block; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: #050505;">{{ review.name }}</span>
+                <span style="display: block; font-size: 12px; color: #8a8a8a; margin-top: 3px;">{{ review.date }}</span>
+              </span>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b9b6b1" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 12h6a6 6 0 1 1-1.8-4.3"/></svg>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin: 16px 0 12px;">
+            <span style="display: flex; gap: 2px; color: #f5a623;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            </span>
+          </div>
+          <p style="font-size: 14px; line-height: 1.55; color: #3d3d3d; margin: 0;">{{ review.text }}</p>
+        </article>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ isArticle }}" hint-placeholder-val="{{ false }}">
+
+<section style="padding: 70px 30px 90px;">
+  <div style="width: min(100%, 1120px); margin: auto; display: grid; grid-template-columns: 1fr minmax(0, 640px) 1fr; gap: 40px;">
+    <div style="grid-column: 2;">
+      <p style="color: #4f4f4f; font-size: 18px; line-height: 1.6; margin: 0 0 34px;">Detailing schedules written for California do not survive a Cleveland winter. Between lake-effect snow, the salt that follows it, and a heavy spring pollen season, a car in Northeast Ohio takes on more in six months than most cars take on in two years.</p>
+
+      <h2 style="font-size: 28px; line-height: 1.1; letter-spacing: -0.05em; margin: 0 0 14px; font-weight: 700;">The short answer</h2>
+      <p style="color: #4f4f4f; font-size: 16px; line-height: 1.7; margin: 0 0 30px;">Two full details a year, timed to the seasons rather than the calendar. One in late March or early April once the salt trucks stop running, and one in October before they start again. If the car lives outside year round, or carries kids, pets, or job-site dirt, add a lighter interior refresh every three months between those two.</p>
+
+      <div style="border: 1px solid #e7e5e1; border-radius: 14px; background: #fff; padding: 24px; box-shadow: 0 14px 34px rgba(20,26,40,0.05); margin: 0 0 34px;">
+        <div style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700; margin-bottom: 14px;">A working schedule</div>
+        <div style="display: grid; gap: 14px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Late March / early April</span>
+            <span style="font-size: 13px; color: #747474;">Full detail, salt removal</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Late May</span>
+            <span style="font-size: 13px; color: #747474;">Exterior wash after pollen</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; border-bottom: 1px solid #efedea; padding-bottom: 14px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">July</span>
+            <span style="font-size: 13px; color: #747474;">Interior refresh</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px;">
+            <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">October</span>
+            <span style="font-size: 13px; color: #747474;">Full detail, protection applied</span>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 28px; line-height: 1.1; letter-spacing: -0.05em; margin: 0 0 14px; font-weight: 700;">Why salt is the deciding factor</h2>
+      <p style="color: #4f4f4f; font-size: 16px; line-height: 1.7; margin: 0 0 18px;">Road salt does not stay on the road. It comes into the cabin on your shoes, dries into the carpet fibres, and pulls moisture out of the air every time the car warms up. That is the white crust you see on floor mats in February, and it is why a vacuum alone does not fix it. Salt needs water and extraction to leave.</p>
+      <p style="color: #4f4f4f; font-size: 16px; line-height: 1.7; margin: 0 0 30px;">Outside, the same salt sits in the seams of rocker panels and wheel arches. On a car that is never washed between November and March, that is five months of continuous contact. A wash every two to three weeks through winter costs far less than the bodywork it prevents.</p>
+
+      <h2 style="font-size: 28px; line-height: 1.1; letter-spacing: -0.05em; margin: 0 0 14px; font-weight: 700;">Signs you have waited too long</h2>
+      <div style="display: grid; gap: 22px; margin: 0 0 34px;">
+        <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+          <strong style="font-size: 14px; font-weight: 500;">The carpet is stiff, not just dirty</strong>
+          <span style="grid-column: 2; color: #747474; font-size: 12px; line-height: 1.55;">Dried salt has bonded to the fibres. Extraction, not vacuuming.</span>
+        </div>
+        <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+          <strong style="font-size: 14px; font-weight: 500;">Windows fog and stay fogged</strong>
+          <span style="grid-column: 2; color: #747474; font-size: 12px; line-height: 1.55;">Trapped moisture in the upholstery, usually with a film on the inside of the glass.</span>
+        </div>
+        <div style="display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27aee9" stroke-width="2.5" stroke-linecap="round" style="grid-row: span 2;"><path d="M20 6 9 17l-5-5"/></svg>
+          <strong style="font-size: 14px; font-weight: 500;">Paint feels rough to a bare hand</strong>
+          <span style="grid-column: 2; color: #747474; font-size: 12px; line-height: 1.55;">Bonded contamination. It needs decontamination before any protection will hold.</span>
+        </div>
+      </div>
+
+      <p style="color: #4f4f4f; font-size: 16px; line-height: 1.7; margin: 0;">If any of those describe your car right now, the honest answer is that the schedule matters less than getting it reset once. Book a full detail, then pick up the seasonal rhythm from there.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding: 40px 30px 100px; background: #fafafa;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: grid; grid-template-columns: 0.8fr 1fr; gap: 10%; align-items: end; margin-bottom: 45px;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">Keep<br /><span style="color: #888;">reading.</span></h2>
+      <p style="font-size: 15px; line-height: 1.5; color: #4f4f4f; max-width: 300px; margin: 0;">More on caring for a vehicle through an Ohio year.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+      <a href="#top" style="display: flex; flex-direction: column; gap: 10px; padding: 24px; border: 1px solid #e7e5e1; border-radius: 14px; background: #fff; transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;" style-hover="transform: translateY(-3px); box-shadow: 0 16px 34px rgba(20,26,40,0.09); border-color: #d8d5d0;">
+        <span style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700;">Winter</span>
+        <strong style="font-size: 17px; font-weight: 700; letter-spacing: -0.03em;">Getting road salt out of carpet</strong>
+        <span style="color: #747474; font-size: 12px; line-height: 1.5;">Why vacuuming does not work, and what does.</span>
+      </a>
+      <a href="#top" style="display: flex; flex-direction: column; gap: 10px; padding: 24px; border: 1px solid #e7e5e1; border-radius: 14px; background: #fff; transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;" style-hover="transform: translateY(-3px); box-shadow: 0 16px 34px rgba(20,26,40,0.09); border-color: #d8d5d0;">
+        <span style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700;">Interior</span>
+        <strong style="font-size: 17px; font-weight: 700; letter-spacing: -0.03em;">Pet hair, and where it hides</strong>
+        <span style="color: #747474; font-size: 12px; line-height: 1.5;">The four places we always find it after a customer says the car is clean.</span>
+      </a>
+      <a href="#top" style="display: flex; flex-direction: column; gap: 10px; padding: 24px; border: 1px solid #e7e5e1; border-radius: 14px; background: #fff; transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;" style-hover="transform: translateY(-3px); box-shadow: 0 16px 34px rgba(20,26,40,0.09); border-color: #d8d5d0;">
+        <span style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700;">Before you sell</span>
+        <strong style="font-size: 17px; font-weight: 700; letter-spacing: -0.03em;">What a detail adds at trade-in</strong>
+        <span style="color: #747474; font-size: 12px; line-height: 1.5;">What dealers actually look at when they walk around your car.</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ isCase }}" hint-placeholder-val="{{ false }}">
+
+<section style="padding: 70px 30px 90px;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 40px;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">Before,<br /><span style="color: #888;">and after.</span></h2>
+      <p style="color: #4f4f4f; font-size: 15px; line-height: 1.5; max-width: 280px; margin: 0;">Drag the handle to see the difference on a real customer vehicle.</p>
+    </div>
+    <div ref="{{ compareRef }}" onPointerDown="{{ startDrag }}" style="position: relative; width: 100%; height: 520px; border-radius: 12px; overflow: hidden; cursor: ew-resize; user-select: none; touch-action: none; background: #0d0f12;">
+      <img src="assets/compare/after.jpg" alt="After detailing" draggable="false" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;" />
+      <div style="{{ clipStyle }}">
+        <img src="assets/compare/before.jpg" alt="Before detailing" draggable="false" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;" />
+      </div>
+      <div style="{{ handleStyle }}">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 42px; height: 42px; border-radius: 50%; background: #fff; box-shadow: 0 5px 18px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; gap: 2px; color: #111;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 6 5 12l6 6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+      <span style="position: absolute; top: 20px; left: 20px; padding: 7px 13px; border-radius: 999px; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); color: #fff; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; pointer-events: none;">Before</span>
+      <span style="position: absolute; bottom: 20px; right: 20px; padding: 7px 13px; border-radius: 999px; background: rgba(255,255,255,0.9); color: #111; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; pointer-events: none;">After</span>
+    </div>
+  </div>
+</section>
+
+<section style="padding: 40px 30px 100px; background: #fafafa;">
+  <div style="width: min(100%, 1120px); margin: auto;">
+    <div style="display: grid; grid-template-columns: 0.8fr 1fr; gap: 10%; align-items: end; margin-bottom: 45px;">
+      <h2 style="font-size: clamp(39px, 4.5vw, 62px); line-height: 0.92; letter-spacing: -0.085em; margin: 0; font-weight: 700;">What the job<br /><span style="color: #888;">actually took.</span></h2>
+      <p style="font-size: 15px; line-height: 1.5; color: #4f4f4f; max-width: 300px; margin: 0;">A work truck used daily on job sites, parked outside through three winters.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start;">
+      <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff; display: grid; gap: 18px;">
+        <div style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #929292; font-weight: 700;">The work, in order</div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">1</span>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Cleared and vacuumed the cab</div>
+            <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">Seats forward, rear bench out of the way, mats pulled and washed separately.</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">2</span>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Two extraction passes on the carpet</div>
+            <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">The first pass came back grey. The second ran close to clear, which is when we stop.</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">3</span>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Decontamination wash outside</div>
+            <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">Salt neutraliser on the rockers and arches, then a full contact wash and clay.</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <span style="flex: 0 0 26px; height: 26px; border-radius: 50%; background: #050505; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700;">4</span>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.02em;">Protection and walk-around</div>
+            <div style="font-size: 12px; color: #747474; line-height: 1.5; margin-top: 4px;">Sealant on paint, dressing on trim and tires, then a walk-around with the owner.</div>
+          </div>
+        </div>
+      </div>
+      <div style="display: grid; gap: 12px; align-content: start;">
+        <div style="border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; background: #fff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+          <div>
+            <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">4 hrs</div>
+            <div style="font-size: 11px; color: #8a8a8a; margin-top: 6px; line-height: 1.4;">On site, one detailer</div>
+          </div>
+          <div>
+            <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">2</div>
+            <div style="font-size: 11px; color: #8a8a8a; margin-top: 6px; line-height: 1.4;">Extraction passes needed</div>
+          </div>
+          <div>
+            <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.05em; line-height: 1;">$0</div>
+            <div style="font-size: 11px; color: #8a8a8a; margin-top: 6px; line-height: 1.4;">Travel fee inside the service area</div>
+          </div>
+        </div>
+        <article style="border-radius: 14px; background: #f4f4f4; padding: 22px; display: flex; flex-direction: column; min-height: 250px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 13px;">
+              <span style="flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: #1a5fb4; color: #fff; display: grid; place-items: center; font-size: 17px; font-weight: 700;">M</span>
+              <span>
+                <span style="display: block; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: #050505;">Marcus, Parma</span>
+                <span style="display: block; font-size: 12px; color: #8a8a8a; margin-top: 3px;">Full detail, June 2026</span>
+              </span>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b9b6b1" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 12h6a6 6 0 1 1-1.8-4.3"/></svg>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin: 16px 0 12px;">
+            <span style="display: flex; gap: 2px; color: #f5a623;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            </span>
+          </div>
+          <p style="font-size: 14px; line-height: 1.55; color: #3d3d3d; margin: 0;">[ Replace with the customer's own words, pulled from the review record in the admin. Case studies publish with an approved quote or none at all. ]</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<section style="position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(260px, 360px) 1fr; align-items: center; gap: clamp(28px, 7vw, 100px); padding: 130px clamp(28px, 12vw, 180px);">
+  <div style="position: absolute; inset: 15% 20%; background: radial-gradient(ellipse at 28% 28%, rgba(191,240,255,0.65), transparent 35%), radial-gradient(ellipse at 73% 47%, rgba(255,225,193,0.44), transparent 34%); filter: blur(22px); opacity: 0.7;"></div>
+  <div style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;">
+    <div style="position: relative; display: grid; place-items: center; width: min(100%, 360px); aspect-ratio: 1.3; perspective: 900px; background: transparent; isolation: isolate;">
+      <div style="position: absolute; width: 82%; height: 72%; border-radius: 50%; background: radial-gradient(circle at 45% 42%, rgba(38,196,215,0.14), rgba(223,10,137,0.07) 42%, transparent 72%); filter: blur(30px); pointer-events: none; z-index: -1;"></div>
+      <div class="atf-float-shadow" style="position: absolute; left: 19%; right: 19%; bottom: 8%; height: 10%; border-radius: 50%; background: rgba(10,24,43,0.18); filter: blur(18px); transform: scaleX(0.86); animation: atf-float-shadow 5.5s ease-in-out infinite; pointer-events: none; z-index: -1;"></div>
+      <div class="atf-float-logo" style="width: min(94%, 330px); transform-style: preserve-3d; animation: atf-float-logo 5.5s ease-in-out infinite; will-change: transform;">
+        <img src="assets/atf-logo-transparent.webp" alt="All Things Fresh Auto Detailing" style="display: block; width: 100%; height: auto; object-fit: contain; background: transparent; border: 0; border-radius: 0; box-shadow: none; filter: drop-shadow(0 14px 14px rgba(6,20,38,0.22)) drop-shadow(0 3px 5px rgba(50,104,181,0.18));" />
+      </div>
+    </div>
+    <span style="font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #888; white-space: nowrap;">The fresh standard</span>
+  </div>
+  <div style="position: relative; z-index: 1;">
+    <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">Your car called</p>
+    <h2 style="font-size: clamp(53px, 7vw, 92px); line-height: 0.92; letter-spacing: -0.085em; margin: 0 0 28px; font-weight: 700;">Give it the<br /><span style="color: #888;">fresh treatment.</span></h2>
+    <button onClick="{{ openBooking }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 999px; padding: 14px 21px; font-size: 12px; font-weight: 700; cursor: pointer; background: #050505; color: #fff; transition: transform 0.2s ease;" style-hover="transform: translateY(-2px);">
+      Book your appointment
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<footer style="border-top: 1px solid #e8e8e8; padding: 46px clamp(22px, 8vw, 110px) 34px; font-size: 11px; color: #777;">
+  <div style="display: flex; flex-wrap: wrap; gap: clamp(28px, 5vw, 70px); align-items: flex-start; justify-content: space-between;">
+    <div style="display: grid; gap: 14px; justify-items: start; flex: 1 1 200px; min-width: 0;">
+      <a href="#top" style="display: block;">
+        <img src="assets/atf-logo-transparent.webp" alt="All Things Fresh Auto Detailing" style="display: block; width: 150px; height: auto; object-fit: contain;" />
+      </a>
+      <span style="font-size: 11px; line-height: 1.6; color: #8a8a8a;">Mobile car detailing &middot; Cleveland, Ohio</span>
+    </div>
+    <nav style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 30px; flex: 1 1 260px; min-width: 0;">
+      <a href="#top" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Home</a>
+      <a href="#services" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Services</a>
+      <a href="#book" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Book online</a>
+      <a href="#area" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Service area</a>
+      <a href="#reviews" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Reviews</a>
+      <a href="#work" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Our work</a>
+      <a href="{{ mapsUrl }}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Google reviews</a>
+      <a href="https://instagram.com/atfcardetailing" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">Instagram</a>
+      <a href="https://www.tiktok.com/@atfcardetailing" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: #4f4f4f; transition: color 0.2s ease;" style-hover="color: #050505;">TikTok</a>
+    </nav>
+    <div style="display: grid; gap: 14px; justify-items: start; flex: 1 1 290px; min-width: 0;">
+      <a href="tel:4408418189" style="font-size: 20px; font-weight: 700; color: #050505; letter-spacing: -0.03em;">440-841-8189</a>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <a href="{{ mapsUrl }}" target="_blank" rel="noopener noreferrer" style="display: grid; place-items: center; width: 132px; height: 92px; border: 1px solid #e8e8e8; border-radius: 10px; background: #fff; padding: 8px;">
+          <img src="assets/badge-google-verified.png" alt="Google Verified Reviews" style="display: block; width: 100%; height: 100%; object-fit: contain;" />
+        </a>
+        <a href="{{ mapsUrl }}" target="_blank" rel="noopener noreferrer" style="display: grid; place-items: center; height: 92px; padding: 0 14px; border: 1px solid #e8e8e8; border-radius: 10px; background: #fff;">
+          <img src="assets/badge-trustindex.png" alt="Verified by Trustindex" style="display: block; height: 22px; width: auto; object-fit: contain;" />
+        </a>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 36px; padding-top: 20px; border-top: 1px solid #efedea; font-size: 11px; color: #9a9a9a;">
+    <span>&copy; 2026 All Things Fresh Auto Detailing</span>
+    <span>Insured &middot; Serving Greater Cleveland</span>
+  </div>
+</footer>
+
+<sc-if value="{{ bookingOpen }}" hint-placeholder-val="{{ false }}">
+  <div onMouseDown="{{ backdropClose }}" style="position: fixed; z-index: 50; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: grid; place-items: center; padding: 20px;">
+    <div role="dialog" aria-modal="true" style="position: relative; background: #fff; width: min(100%, 480px); padding: 38px; border-radius: 15px; box-shadow: 0 25px 80px rgba(0,0,0,0.25);">
+      <button onClick="{{ closeBooking }}" aria-label="Close" style="position: absolute; top: 15px; right: 15px; border: 0; background: #f0f0f0; border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="width: 56px; height: 56px; display: grid; place-items: center; margin: 0 auto 20px; border-radius: 50%; background: #d9f5ff;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">Request received</p>
+          <h2 style="font-size: 40px; line-height: 0.95; letter-spacing: -0.07em; margin: 0 0 10px;">We'll be in touch.</h2>
+          <p style="color: #777; font-size: 13px; line-height: 1.5;">Thanks for choosing All Things Fresh. We'll confirm your appointment shortly.</p>
+          <button onClick="{{ closeBooking }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 999px; padding: 14px 21px; font-size: 12px; font-weight: 700; cursor: pointer; background: #050505; color: #fff;">Done</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <p style="margin: 0 0 15px; color: #929292; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">All Things Fresh</p>
+          <h2 style="font-size: 40px; line-height: 0.95; letter-spacing: -0.07em; margin: 0 0 10px;">Book your detail.</h2>
+          <p style="color: #777; font-size: 13px; line-height: 1.5; margin: 0;">Tell us about your vehicle and preferred appointment time.</p>
+          <form onSubmit="{{ submit }}" style="display: grid; gap: 13px; margin-top: 22px;">
+            <label style="display: grid; gap: 6px; font-size: 11px; font-weight: 700;">Name<input required placeholder="Your name" style="width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 400;" /></label>
+            <label style="display: grid; gap: 6px; font-size: 11px; font-weight: 700;">Phone<input required type="tel" placeholder="(440) 000-0000" style="width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 400;" /></label>
+            <label style="display: grid; gap: 6px; font-size: 11px; font-weight: 700;">Service<select style="width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 400;"><option>Interior detail</option><option>Exterior detail</option><option>Full detail</option></select></label>
+            <label style="display: grid; gap: 6px; font-size: 11px; font-weight: 700;">Preferred date<input required type="date" style="width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 400;" /></label>
+            <label style="display: grid; gap: 6px; font-size: 11px; font-weight: 700;">Vehicle notes<textarea rows="3" placeholder="Year, make, model, and anything we should know" style="width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 7px; background: #fff; font-size: 13px; font-weight: 400;"></textarea></label>
+            <button type="submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 999px; padding: 14px 21px; font-size: 12px; font-weight: 700; cursor: pointer; background: #050505; color: #fff;">
+              Request appointment
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </form>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="{{ toastStyle }}">
+    <span style="flex: 1;">{{ toastMessage }}</span>
+    <button onClick="{{ dismissToast }}" aria-label="Dismiss notification" style="border: 0; background: transparent; cursor: pointer; padding: 0; color: inherit; opacity: 0.75; flex-shrink: 0;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</sc-if>
+
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const MAPS = 'https://www.google.com/maps/search/All+Things+Fresh+Auto+Detailing+Cleveland+OH';
+
+const LOCAL_REVIEWS = [
+  ['Vanessa Dawson', '2 months ago', '#1a5fb4', "Best detail I've ever gotten by far. Quick and efficient! I would 10/10 recommended ATF detailing to anyone looking for a detail!"],
+  ['Dylan Johnson', '2 months ago', '#d95a00', "They did an amazing job on my dad's boat as I got him a detail for Father's Day. Brought it back to brand new."],
+  ['Arielle Germain', '4 months ago', '#c0392b', 'Antonio did a great job working in my car! I had an issue with carpet beetles and he vacuumed, steamed, and cleaned meticulously.'],
+];
+
+const ROUTES = {
+  service: '/services/interior-detailing',
+  location: '/service-area/lakewood-oh',
+  article: '/resources/how-often-to-detail-a-car-in-ohio',
+  caseStudy: '/our-work/2016-silverado-full-detail-parma',
+};
+
+class Component extends DCLogic {
+  state = { template: 'service', booking: false, sent: false, pos: 55, toast: null };
+
+  componentDidMount() {
+    this._up = () => { this._dragging = false; };
+    this._move = (e) => {
+      if (!this._dragging || !this.compareEl) return;
+      const r = this.compareEl.getBoundingClientRect();
+      const p = Math.max(2, Math.min(98, ((e.clientX - r.left) / r.width) * 100));
+      this.setState({ pos: p });
+    };
+    window.addEventListener('pointerup', this._up);
+    window.addEventListener('pointermove', this._move);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._toastTimer);
+    window.removeEventListener('pointerup', this._up);
+    window.removeEventListener('pointermove', this._move);
+  }
+
+  showToast(type, message) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toast: { type, message } });
+    this._toastTimer = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+
+  dismissToastNow() {
+    clearTimeout(this._toastTimer);
+    this.setState({ toast: null });
+  }
+
+  toastStyle(type) {
+    const accent = type === 'error' ? '#c0392b' : '#1a7f37';
+    return 'position: fixed; z-index: 60; right: 18px; bottom: 18px; max-width: 320px; padding: 14px 18px; border-radius: 12px; box-shadow: 0 14px 34px rgba(20,26,40,0.25); display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; background: #050505; color: #fff; border-left: 4px solid ' + accent + ';';
+  }
+
+  tab(active) {
+    return 'border: 1px solid ' + (active ? '#e9efec' : '#2b2e2f') + '; border-radius: 6px; padding: 8px 14px; font-size: 11px; letter-spacing: 0.04em; cursor: pointer; font-family: inherit; transition: all .2s ease; background: ' +
+      (active ? '#e9efec' : 'transparent') + '; color: ' + (active ? '#101112' : '#9aa8a4') + ';';
+  }
+
+  pick(t) { return () => this.setState({ template: t }); }
+
+  renderVals() {
+    const t = this.state.template;
+    return {
+      isService: t === 'service',
+      isLocation: t === 'location',
+      isArticle: t === 'article',
+      isCase: t === 'case',
+      routePattern: t === 'service' ? ROUTES.service : t === 'location' ? ROUTES.location : t === 'article' ? ROUTES.article : ROUTES.caseStudy,
+      tabService: this.tab(t === 'service'),
+      tabLocation: this.tab(t === 'location'),
+      tabArticle: this.tab(t === 'article'),
+      tabCase: this.tab(t === 'case'),
+      pickService: this.pick('service'),
+      pickLocation: this.pick('location'),
+      pickArticle: this.pick('article'),
+      pickCase: this.pick('case'),
+      mapsUrl: MAPS,
+      localReviews: LOCAL_REVIEWS.map(([name, date, color, text]) => ({
+        name, date, text,
+        initial: name.charAt(0),
+        avatarStyle: 'flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: ' + color + '; color: #fff; display: grid; place-items: center; font-size: 17px; font-weight: 700;',
+      })),
+      bookingOpen: this.state.booking,
+      sent: this.state.sent,
+      notSent: !this.state.sent,
+      openBooking: () => this.setState({ booking: true, sent: false }),
+      closeBooking: () => this.setState({ booking: false }),
+      backdropClose: (e) => { if (e.target === e.currentTarget) this.setState({ booking: false }); },
+      submit: (e) => { e.preventDefault(); this.setState({ sent: true }); },
+      toastVisible: !!this.state.toast,
+      toastMessage: this.state.toast ? this.state.toast.message : '',
+      toastStyle: this.state.toast ? this.toastStyle(this.state.toast.type) : '',
+      dismissToast: () => this.dismissToastNow(),
+      compareRef: (el) => { this.compareEl = el; },
+      startDrag: (e) => {
+        this._dragging = true;
+        if (e.currentTarget && e.pointerId != null && e.currentTarget.setPointerCapture) {
+          try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        this._move(e);
+      },
+      clipStyle: 'position: absolute; inset: 0; clip-path: inset(0 ' + (100 - this.state.pos) + '% 0 0); pointer-events: none;',
+      handleStyle: 'position: absolute; top: 0; bottom: 0; left: ' + this.state.pos + '%; width: 2px; background: #fff; box-shadow: 0 0 16px rgba(0,0,0,0.4); pointer-events: none;',
+    };
+  }
+}
+</script>
+</body>
+</html>

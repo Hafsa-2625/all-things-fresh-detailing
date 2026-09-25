@@ -1,0 +1,218 @@
+@import "tailwindcss";
+
+/*
+ * Token model (Section 7/8 of the platform brief):
+ * - canvas      : the dominant page background. Off-white in light mode, near-black in dark mode.
+ * - cinematic   : the fixed dark "signature" sections (hero, film, social, craftsmanship, final CTA,
+ *                 footer). These stay near-black in BOTH themes — they are a structural rhythm choice,
+ *                 not a light/dark-mode concern. This preserves the approved section rhythm regardless
+ *                 of visitor theme preference.
+ * - contrast    : the alternating "light" sections (services, before/after, portfolio, reviews,
+ *                 booking). Off-white in light mode; a raised charcoal "lighter contrast area" in dark
+ *                 mode, per the brief's instruction that dark mode is art-directed, not a literal
+ *                 color inversion.
+ * - *-inverse   : content sitting ON a cinematic surface (its text, muted text, borders, and the
+ *                 light-on-dark button fill). Because `cinematic` is deliberately near-black in BOTH
+ *                 themes, these MUST NOT flip with the theme — they are declared once, outside the
+ *                 dark-mode blocks, and stay light always. Flipping them (as an earlier revision did)
+ *                 renders near-black text on the near-black hero in dark mode, i.e. invisible.
+ */
+
+:root {
+  --color-canvas: #f7f5f0;
+  --color-cinematic: #0a0a0a;
+  --color-cinematic-raised: #141311;
+  --color-contrast: #ffffff;
+  --color-contrast-raised: #efece3;
+
+  --color-ink: #14120d;
+  /* Alpha values are chosen to clear WCAG AA (4.5:1) against the LIGHTEST
+     surface each is used on, verified numerically — muted 5.4:1, faint
+     4.7:1 on canvas. `faint` was 0.44 (2.89:1, failing) before the design
+     QA pass; don't lower these without re-checking contrast. */
+  --color-ink-muted: rgba(20, 18, 13, 0.64);
+  --color-ink-faint: rgba(20, 18, 13, 0.60);
+
+  /* Theme-independent — see the "*-inverse" note in the header comment. */
+  --color-ink-inverse: #f7f5f0;
+  --color-ink-inverse-muted: rgba(247, 245, 240, 0.68);
+  --color-ink-inverse-faint: rgba(247, 245, 240, 0.58);
+  --color-border-inverse: rgba(247, 245, 240, 0.16);
+
+  --color-border: rgba(20, 18, 13, 0.12);
+
+  --color-accent: #14120d;
+  --color-accent-contrast: #f7f5f0;
+
+  --color-focus: #a8391d;
+  --color-success: #2f5c34;
+  --color-danger: #a3271f;
+  --color-warning: #8a5a10;
+
+  /* Restrained, intentional radii — three steps only. `pill` is reserved for
+     genuinely pill-shaped controls (switch groups, tags), never for cards or
+     buttons, which would read as generic SaaS. */
+  --radius-card: 14px;
+  --radius-control: 8px;
+  --radius-pill: 999px;
+
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-canvas: #0a0a0a;
+    --color-cinematic: #0a0a0a;
+    --color-cinematic-raised: #17140f;
+    --color-contrast: #171410;
+    --color-contrast-raised: #201c15;
+
+    --color-ink: #f5f2ea;
+    --color-ink-muted: rgba(245, 242, 234, 0.66);
+    --color-ink-faint: rgba(245, 242, 234, 0.56);
+
+    /* NOTE: *-inverse tokens are deliberately NOT redefined here. */
+    --color-border: rgba(245, 242, 234, 0.14);
+
+    --color-accent: #f5f2ea;
+    --color-accent-contrast: #14120d;
+    --color-success: #7fbf82;
+    --color-danger: #e08877;
+    --color-warning: #e0b978;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-canvas: #0a0a0a;
+  --color-cinematic: #0a0a0a;
+  --color-cinematic-raised: #17140f;
+  --color-contrast: #171410;
+  --color-contrast-raised: #201c15;
+
+  --color-ink: #f5f2ea;
+  --color-ink-muted: rgba(245, 242, 234, 0.66);
+  --color-ink-faint: rgba(245, 242, 234, 0.56);
+
+  /* NOTE: *-inverse tokens are deliberately NOT redefined here. */
+  --color-border: rgba(245, 242, 234, 0.14);
+
+  --color-accent: #f5f2ea;
+  --color-accent-contrast: #14120d;
+  --color-success: #7fbf82;
+  --color-danger: #e08877;
+  --color-warning: #e0b978;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--color-canvas);
+  --color-cinematic: var(--color-cinematic);
+  --color-cinematic-raised: var(--color-cinematic-raised);
+  --color-contrast: var(--color-contrast);
+  --color-contrast-raised: var(--color-contrast-raised);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-ink-inverse: var(--color-ink-inverse);
+  --color-ink-inverse-muted: var(--color-ink-inverse-muted);
+  --color-ink-inverse-faint: var(--color-ink-inverse-faint);
+  --color-border: var(--color-border);
+  --color-border-inverse: var(--color-border-inverse);
+  --color-accent: var(--color-accent);
+  --color-accent-contrast: var(--color-accent-contrast);
+  --color-focus: var(--color-focus);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+  --radius-pill: var(--radius-pill);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+/*
+ * Type scale — a plain `@theme` block, NOT `@theme inline`.
+ *
+ * Tailwind v4 turns each `--text-*` key here into a real font-size utility
+ * (`text-caption`, `text-small`, …). This must use literal values: an
+ * earlier revision declared them self-referentially inside `@theme inline`
+ * (`--text-caption: var(--text-caption)`), which Tailwind could not resolve,
+ * so it emitted no utilities at all and every element silently fell back to
+ * the 16px browser default. Typecheck, lint and build all still passed —
+ * only measuring computed font sizes in a browser caught it. If you change
+ * these, re-verify with `window.getComputedStyle` on a real element rather
+ * than trusting the build.
+ *
+ * Display/heading sizes stay fluid via clamp() at the call site; these are
+ * the fixed UI/text steps.
+ */
+@theme {
+  --text-caption: 11px; /* eyebrows, metadata, badges */
+  --text-small: 13px;   /* secondary/supporting copy */
+  --text-body: 15px;    /* default reading size */
+  --text-lead: 17px;    /* intro paragraphs, emphasised body */
+  --text-title: 20px;   /* card and sub-section titles */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/*
+ * Section rhythm. The design QA pass measured 8 different padding
+ * combinations across 12 homepage sections — the uneven vertical rhythm was
+ * a big part of why the page read as less considered than the reference.
+ * These two utilities are the only vertical section padding the site uses.
+ */
+.section-rhythm {
+  padding-block: clamp(64px, 7vw, 112px);
+}
+.section-rhythm-tight {
+  padding-block: clamp(44px, 5vw, 76px);
+}
+
+@keyframes atf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--color-focus);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
