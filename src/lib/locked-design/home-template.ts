@@ -215,6 +215,79 @@ function applyFilmVideo(markup: string, tenant?: TenantConfig): string {
   return setDesignProps(markup.replace(placeholder, "").replace(player, () => deferredPlayer), { youtubeUrl: url });
 }
 
+const INSTAGRAM_SECTION = /<sc-if value="\{\{ showIgFeed \}\}"[^>]*>\s*<section id="work"[\s\S]*?<\/section>\s*<\/sc-if>/;
+// The Instagram glyph, as the Follow button (17px) and the card brand mark (16px) draw it.
+const INSTAGRAM_ICON = /(<svg width="1[67]" height="1[67]" viewBox="0 0 24 24") fill="none"( aria-hidden="true")?><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.7"\/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.7"\/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"\/><\/svg>/g;
+// The design's own TikTok glyph, from the hero's social links.
+const TIKTOK_PATH = '<path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.68v13.67a2.4 2.4 0 1 1-4.33-2.4 2.4 2.4 0 0 1 .82 1.77V9.5a6 6 0 1 0 5.83 3.9V6.69Z"/>';
+const INSTAGRAM_STATS = "<div><strong>{{ igPostsCount }}</strong><span>posts</span></div>\n        <div><strong>{{ igFollowers }}</strong><span>followers</span></div>";
+const TIKTOK_STATS = "<div><strong>{{ ttFollowers }}</strong><span>followers</span></div>\n        <div><strong>{{ ttLikes }}</strong><span>likes</span></div>";
+
+/** Script edits that give the TikTok rail the Instagram rail's state, ref, arrows and values. */
+const TIKTOK_SCRIPT: Array<[string, string]> = [
+  ["    igAtEnd: true,\n", "    igAtEnd: true,\n    ttCanScroll: false,\n    ttAtStart: true,\n    ttAtEnd: true,\n"],
+  ["    if (key === 'ig') this.igCarousel = el;\n", "    if (key === 'ig') this.igCarousel = el;\n    if (key === 'tt') this.ttCarousel = el;\n"],
+  ["    this.unbindRail('ig');\n", "    this.unbindRail('ig');\n    this.unbindRail('tt');\n"],
+  [
+    "    const igPosts = mapSocialPosts(feed.instagram.posts);\n",
+    "    const igPosts = mapSocialPosts(feed.instagram.posts);\n    const ttProfile = (feed.tiktok && feed.tiktok.profile) || {};\n    const ttPosts = mapSocialPosts(feed.tiktok && feed.tiktok.posts);\n",
+  ],
+  [
+    "      showIgNext: this.state.igCanScroll && !this.state.igAtEnd,\n",
+    `      showIgNext: this.state.igCanScroll && !this.state.igAtEnd,
+      showTtFeed: ttPosts.length > 0,
+      ttName: ttProfile.name || '',
+      ttHandle: ttProfile.handle || '',
+      ttUrl: ttProfile.url || 'https://www.tiktok.com/@atfcardetailing1',
+      ttAvatar: ttProfile.avatar || '/assets/tiktok/avatar.webp',
+      ttFollowers: ttProfile.followers || '',
+      ttLikes: ttProfile.likes || '',
+      ttShowStats: !!(ttProfile.followers || ttProfile.likes),
+      ttPosts,
+      ttCarouselRef: (el) => this.bindRail('tt', el),
+      scrollTtLeft: () => scrollRail(this.ttCarousel, -1),
+      scrollTtRight: () => scrollRail(this.ttCarousel, 1),
+      showTtPrev: this.state.ttCanScroll && !this.state.ttAtStart,
+      showTtNext: this.state.ttCanScroll && !this.state.ttAtEnd,
+`,
+  ],
+];
+
+/**
+ * The TikTok feed is the Instagram section (`#work`) with its `ig*` bindings renamed to `tt*`: the
+ * same classes, card sizes, hover overlay and arrows, so the two read as one component. What
+ * differs is TikTok's own data (followers and likes in place of posts and followers), glyph and red
+ * Follow button. It sits directly below Instagram, and is left out when the account is disabled.
+ *
+ * Both feeds' images go through the runtime's camel-case attribute, which the browser ignores, so
+ * the raw template shown before boot never requests the literal "{{ post.src }}" or avatar URL.
+ */
+function addTikTokFeed(markup: string, showTikTok: boolean): string {
+  const instagram = markup.match(INSTAGRAM_SECTION)?.[0];
+  if (!instagram || !instagram.includes(INSTAGRAM_STATS) || instagram.match(INSTAGRAM_ICON)?.length !== 3) {
+    throw new Error("Approved Instagram section was not found");
+  }
+  const deferred = instagram.replaceAll('src="{{ igAvatar }}"', 'sc-camel-src="{{ igAvatar }}"').replace('src="{{ post.src }}"', 'sc-camel-src="{{ post.src }}"');
+  if (!showTikTok) return markup.replace(instagram, () => deferred);
+
+  let script = markup;
+  for (const [from, to] of TIKTOK_SCRIPT) {
+    if (!script.includes(from)) throw new Error(`Homepage social script changed: ${from.trim()}`);
+    script = script.replace(from, () => to);
+  }
+  const tiktok = deferred
+    .replace('<section id="work" class="atf-social atf-social--instagram">', '<section id="tiktok" class="atf-social atf-social--tiktok">')
+    .replace(INSTAGRAM_STATS, TIKTOK_STATS)
+    .replace(INSTAGRAM_ICON, (_, open: string, hidden = "") => `${open} fill="currentColor"${hidden}>${TIKTOK_PATH}</svg>`)
+    .replace("atf-social__follow--ig", "atf-social__follow--tt")
+    .replaceAll("{{ ig", "{{ tt")
+    .replaceAll("{{ showIg", "{{ showTt")
+    .replaceAll("{{ scrollIg", "{{ scrollTt")
+    .replaceAll(" Instagram posts", " TikTok posts");
+  if (/\{\{ (ig|showIg|scrollIg)|Instagram|--ig\b|--instagram/.test(tiktok)) throw new Error("TikTok section still refers to Instagram");
+  return script.replace(instagram, () => `${deferred}\n\n${tiktok}`);
+}
+
 function applyBusinessSettings(markup: string, tenant?: TenantConfig): string {
   if (!tenant) return markup;
   const phoneDigits = tenant.business.phone.replace(/\D/g, "");
@@ -250,6 +323,7 @@ export function getLockedHomeMarkup(tenant?: TenantConfig, media: Record<string,
   markup = setDesignProps(markup, { showComparison: true });
   markup = makeComparisonKeyboardAccessible(markup);
   markup = applyFilmVideo(markup, tenant);
+  markup = addTikTokFeed(markup, resolveSocialFeed(tenant).tiktok.posts.length > 0);
   markup = markup.replace("</helmet>", `${responsiveCss}</helmet>`);
   markup = addMenuToggle(markup);
   markup = markup.replaceAll('src="assets/', 'src="/assets/');

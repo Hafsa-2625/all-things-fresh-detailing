@@ -103,6 +103,8 @@ sc-if[hint-placeholder-val="{{ false }}"] {
   font-family: Arial, Helvetica, sans-serif;
 }
 .atf-social--instagram { padding: 90px 0 40px; }
+/* Directly below Instagram: its header sits the same 90px under the Instagram rail. */
+.atf-social--tiktok { padding: 50px 0 40px; }
 
 .atf-social__wrap {
   max-width: 1400px;
@@ -191,6 +193,7 @@ sc-if[hint-placeholder-val="{{ false }}"] {
 }
 .atf-social__follow:hover { opacity: 0.88; color: #fff; }
 .atf-social__follow--ig { background: #0095f6; }
+.atf-social__follow--tt { background: #fe2c55; }
 
 .atf-social__rail-wrap { position: relative; }
 .atf-social__rail {
@@ -376,6 +379,7 @@ sc-if[hint-placeholder-val="{{ false }}"] {
 
 @media (max-width: 900px) {
   .atf-social--instagram { padding: 70px 0 32px; }
+  .atf-social--tiktok { padding: 38px 0 32px; }
   .atf-social__wrap { padding: 0 30px; }
 }
 @media (max-width: 600px) {
