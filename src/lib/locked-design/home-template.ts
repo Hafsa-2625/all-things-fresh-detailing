@@ -5,14 +5,38 @@ import { join } from "node:path";
 import type { TenantConfig } from "@/tenant/schema";
 import type { SlotMedia } from "@/lib/content/catalog";
 import { resolveSocialFeed } from "@/lib/social/content";
-import { addMenuToggle } from "@/lib/locked-design/responsive";
+import { addMenuToggle, SHARED_RESPONSIVE_RULES } from "@/lib/locked-design/responsive";
 
 const sourcePath = join(process.cwd(), "design-source", "current-zip", "ATF Detail Site.dc.html");
 // Plain token (no block-comment delimiters) so bundlers cannot strip it.
 const SOCIAL_FEED_SENTINEL = "__ATF_SOCIAL_FEED_JSON__";
 
 // Mobile / tablet rules for the locked design go here (injected before </helmet>).
-const responsiveCss = `<style data-atf-responsive="true">
+// Desktop is untouched: everything is inside a max-width query. See responsive.ts.
+const responsiveCss = `<style data-atf-responsive="true">${SHARED_RESPONSIVE_RULES}
+@media (max-width: 900px) {
+  /* Hero: taller than 2.25:1 so the car stays clear of the text and social row. */
+  #top [style*="aspect-ratio: 2.25 / 1"] { min-height: 520px !important; }
+  #top [style*="margin: 55px 0"] { margin-left: 0 !important; }
+  #top [style*="grid-column: 2; display: grid"] { grid-column: 1 / -1 !important; }
+}
+@media (max-width: 600px) {
+  #top [style*="aspect-ratio: 2.25 / 1"] { min-height: calc(370px + 28vw) !important; }
+  #top [style*="aspect-ratio: 1163 / 330"] { left: 2% !important; right: 2% !important; }
+  #top [style*="left: 3.5%; top: 35%"] { top: 125px !important; left: 30px !important; }
+  #top [style*="right: 3.5%; top: 34%"] { top: 262px !important; left: 30px !important; right: auto !important; }
+  #top [style*="right: 3.5%; top: 46%"] { top: 296px !important; left: 30px !important; right: auto !important; }
+  #top a[aria-label="See our work"] { top: 306px !important; right: 16px !important; }
+  #top a[aria-label="Scroll down to services"] { top: 50px !important; left: 130px !important; }
+  #top .atf-services-head { flex-direction: column !important; align-items: flex-start !important; }
+  #top .atf-services-head > [style*="justify-items: end"] { justify-items: start !important; }
+  #top .atf-services-head [style*="text-align: right"] { text-align: left !important; }
+  /* Reviews: one card at a time; the arrows already rotate which review comes first. */
+  #reviews [style*="repeat(3"] > :not(:first-child) { display: none !important; }
+  #top [style*="grid-template-columns: 1.4fr 1fr 1fr"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #top [style*="grid-template-columns: 1.4fr 1fr 1fr"] > :first-child { grid-column: 1 / -1; }
+  #top form[style*="gap: 30px; padding: 34px"] { padding: 22px !important; }
+}
 </style>`;
 
 function escapeHtml(value: string): string {

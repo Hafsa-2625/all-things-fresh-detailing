@@ -7,7 +7,7 @@ import { buildPagePath } from "@/seo/metadata";
 import { getPublishedPages } from "@/seo/registry";
 import type { TenantConfig } from "@/tenant/schema";
 import { emptyCatalog, type CatalogReview, type PageCatalog } from "@/lib/content/catalog";
-import { addMenuToggle } from "@/lib/locked-design/responsive";
+import { addMenuToggle, SHARED_RESPONSIVE_RULES } from "@/lib/locked-design/responsive";
 import type { CaseStudy } from "@/lib/content/case-studies";
 
 export type LockedTemplate = "service" | "location" | "article" | "case";
@@ -15,7 +15,14 @@ export type LockedTemplate = "service" | "location" | "article" | "case";
 const sourcePath = join(process.cwd(), "design-source", "current-zip", "ATF Page Templates.dc.html");
 
 // Mobile / tablet rules for the locked design go here (injected before </helmet>).
-const responsiveCss = `<style data-atf-responsive="true">
+// Desktop is untouched: everything is inside a max-width query. See responsive.ts.
+const responsiveCss = `<style data-atf-responsive="true">${SHARED_RESPONSIVE_RULES}
+@media (max-width: 900px) {
+  /* Hero side padding matches the 30px the sections below use. */
+  #top > section:first-of-type > [style*="border-radius: 20px"] { padding-left: 30px !important; padding-right: 30px !important; }
+  /* Article: keep the three tracks so the body's grid-column: 2 still applies, but collapse the gutters. */
+  #top [style*="grid-template-columns: 1fr minmax(0"] { grid-template-columns: 0 minmax(0, 1fr) 0 !important; gap: 0 !important; }
+}
 </style>`;
 
 function html(value: string): string {
