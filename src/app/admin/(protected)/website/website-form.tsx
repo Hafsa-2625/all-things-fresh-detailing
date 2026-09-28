@@ -49,6 +49,16 @@ export function WebsiteForm({ config, canEdit }: { config: TenantConfig; canEdit
 
         <section>
           <h2 className="mb-3 text-small font-semibold uppercase tracking-[0.08em] text-[var(--color-ink-faint)]">
+            Homepage video
+          </h2>
+          <Field label="Video URL (YouTube or Vimeo)" name="filmVideo" defaultValue={config.media.filmVideo ?? ""} />
+          <p className="mt-1.5 text-small text-[var(--color-ink-faint)]">
+            Plays muted, on a loop, with no player controls. Leave it empty to show the &ldquo;Add your video&rdquo; placeholder.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-small font-semibold uppercase tracking-[0.08em] text-[var(--color-ink-faint)]">
             Social
           </h2>
           <div className="flex flex-col gap-4">

@@ -5,6 +5,7 @@ import { tenantConfigSchema, type TenantConfig } from "@/tenant/schema";
 import { getLatestConfigForEditing } from "@/tenant/admin-queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireStaff, canWrite } from "@/lib/admin/session";
+import { canonicalFilmVideoUrl } from "@/lib/content/film-video";
 
 export interface WebsiteFormState {
   status: "idle" | "saved" | "published" | "error";
@@ -36,6 +37,11 @@ function applyFormPatch(base: TenantConfig, formData: FormData): TenantConfig {
       instagram: { ...base.social.instagram, enabled: flag("instagram_enabled"), url: str("instagram_url", base.social.instagram.url ?? "") },
       tiktok: { ...base.social.tiktok, enabled: flag("tiktok_enabled"), url: str("tiktok_url", base.social.tiktok.url ?? "") },
       youtube: { ...base.social.youtube, enabled: flag("youtube_enabled"), url: str("youtube_url", base.social.youtube.url ?? "") },
+    },
+    media: {
+      ...base.media,
+      // Empty clears it, and the homepage film section falls back to its placeholder.
+      filmVideo: formData.has("filmVideo") ? canonicalFilmVideoUrl(str("filmVideo", "")) || undefined : base.media.filmVideo,
     },
   });
 }
