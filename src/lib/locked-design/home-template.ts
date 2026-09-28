@@ -156,6 +156,27 @@ function fillComparePhotos(markup: string, media: Record<string, SlotMedia>): st
 }
 
 /**
+ * The comparison slider is drag-only in the design. This adds arrow / Home / End keys for keyboard
+ * users; nothing changes visually (the browser's focus ring shows only for keyboard focus).
+ */
+function makeComparisonKeyboardAccessible(markup: string): string {
+  const box = '<div ref="{{ compareRef }}" onPointerDown="{{ startDrag }}"';
+  const values = "      compareRef: (el) => { this.compareEl = el; },";
+  if (!markup.includes(box) || !markup.includes(values)) throw new Error("Approved comparison slider was not found");
+  return markup
+    .replace(box, `${box} tabindex="0" role="slider" aria-label="Before and after photos" aria-valuemin="2" aria-valuemax="98" aria-valuenow="{{ comparePos }}" onKeyDown="{{ compareKey }}"`)
+    .replace(values, () => `${values}
+      comparePos: Math.round(this.state.pos),
+      compareKey: (e) => {
+        const step = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 }[e.key];
+        const to = e.key === 'Home' ? 2 : e.key === 'End' ? 98 : step ? Math.max(2, Math.min(98, this.state.pos + step)) : null;
+        if (to === null) return;
+        e.preventDefault();
+        this.setState({ pos: to });
+      },`);
+}
+
+/**
  * Sets default values of the design's own props (the `data-props` metadata the design runtime reads
  * its defaults from), so the server markup and the booted page agree.
  */
@@ -204,6 +225,7 @@ export function getLockedHomeMarkup(tenant?: TenantConfig, media: Record<string,
 
   let markup = match[1];
   markup = setDesignProps(markup, { showComparison: true });
+  markup = makeComparisonKeyboardAccessible(markup);
   markup = markup.replace("</helmet>", `${responsiveCss}</helmet>`);
   markup = addMenuToggle(markup);
   markup = markup.replaceAll('src="assets/', 'src="/assets/');
