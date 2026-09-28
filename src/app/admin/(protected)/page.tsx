@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getTenant } from "@/tenant/get-tenant";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { listRecords, resourceCounts, type StoredRecord } from "@/lib/operations/store";
-import { staleLeads } from "@/lib/operations/insights";
+import { quoteInsights, staleLeads } from "@/lib/operations/insights";
+import { formatMoney } from "@/lib/operations/money";
 
 function isToday(value: unknown): boolean {
   if (typeof value !== "string" || !value) return false;
@@ -18,20 +19,24 @@ export default async function TodayPage() {
   let counts = Object.fromEntries(resources.map((resource) => [resource, 0])) as Record<(typeof resources)[number], number>;
   let appointments: StoredRecord[] = [];
   let stale: StoredRecord[] = [];
+  let quotes: Awaited<ReturnType<typeof quoteInsights>> = { open: [], expiring: [] };
   try {
-    [counts, appointments, stale] = await Promise.all([
+    [counts, appointments, stale, quotes] = await Promise.all([
       resourceCounts([...resources]),
       listRecords("appointments", 500),
       staleLeads(),
+      quoteInsights(),
     ]);
   } catch { /* The connection checklist below remains actionable. */ }
 
   const todaysAppointments = appointments.filter((item) => isToday(item.starts_at)).sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)));
-  const attentionCount = stale.length;
+  const attentionCount = stale.length + quotes.expiring.length;
+  const today = new Date().toISOString().slice(0, 10);
 
   const cards = [
     ["New leads", counts.leads, "/admin/leads"], ["Customers", counts.customers, "/admin/customers"],
     ["Appointments", counts.appointments, "/admin/jobs"], ["Active jobs", counts.jobs, "/admin/jobs"],
+    ["Open quotes", quotes.open.length, "/admin/leads"],
   ] as const;
 
   return <div className="max-w-[1180px]">
@@ -44,6 +49,7 @@ export default async function TodayPage() {
       <h2 className="text-[18px] font-bold">Needs attention {attentionCount > 0 && <span className="ml-1 rounded-full bg-[#a33] px-2 py-0.5 text-[11px] font-bold text-white align-middle">{attentionCount}</span>}</h2>
       <div className="mt-3 grid gap-2">
         {stale.map((lead) => <Link key={`lead-${lead.id}`} href="/admin/leads" className="grid grid-cols-[1fr_auto] gap-3 rounded-[10px] bg-[#f4f4f4] px-4 py-3 text-[12px]"><span>Lead {String(lead.name)} needs follow-up</span><strong className="text-[#747474]">New {String(lead.created_at).slice(0, 10)}</strong></Link>)}
+        {quotes.expiring.map((quote) => <Link key={`quote-${quote.id}`} href="/admin/leads" className="grid grid-cols-[1fr_auto] gap-3 rounded-[10px] bg-[#f4f4f4] px-4 py-3 text-[12px]"><span>Quote {String(quote.quote_number)} ({formatMoney(quote.total)}) {String(quote.expires_on) < today ? "has expired" : "expiring soon"} — still {String(quote.status)}</span><strong className="text-[#747474]">{String(quote.expires_on) < today ? "Expired" : "Expires"} {String(quote.expires_on)}</strong></Link>)}
         {attentionCount === 0 && <p className="rounded-[10px] bg-[#fafafa] px-4 py-6 text-center text-[12px] text-[#929292]">Nothing needs attention right now.</p>}
       </div>
     </section>
