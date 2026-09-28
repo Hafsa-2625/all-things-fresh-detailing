@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { formatMoney } from "@/lib/operations/money";
 import type { ResourceName } from "@/lib/operations/schemas";
 import type { StoredRecord } from "@/lib/operations/store";
 
@@ -13,6 +14,8 @@ export interface AdminField {
   /** Plain values, or value + label when the stored value is not human-readable (e.g. a media id). Also the option list for `relation` fields. */
   options?: (string | { value: string; label: string })[];
   placeholder?: string;
+  /** `number` only: the browser rejects anything off this step; the default of 1 would refuse cents. */
+  step?: string;
   /** `relation` only: render a multi-select backed by a jsonb array (e.g. `jobs.crew_ids`) instead of a single value. */
   multiple?: boolean;
   /** `repeater` only: the shape of one row. Omit for a repeater of plain strings (e.g. a neighbourhood list). */
@@ -147,7 +150,7 @@ function FieldInput({ field, row, editing }: { field: AdminField; row: StoredRec
       </select>
     );
   }
-  return <input name={field.name} required={field.required} type={field.type || "text"} defaultValue={row ? defaultFieldValue(row, field) : undefined} placeholder={field.placeholder} className={`rounded-[8px] border ${borderClass} bg-white px-3 py-2 text-[12px] font-normal`} />;
+  return <input name={field.name} required={field.required} type={field.type || "text"} step={field.step} defaultValue={row ? defaultFieldValue(row, field) : undefined} placeholder={field.placeholder} className={`rounded-[8px] border ${borderClass} bg-white px-3 py-2 text-[12px] font-normal`} />;
 }
 
 export function ResourceManager({
@@ -162,6 +165,7 @@ export function ResourceManager({
   statusField,
   statusOptions,
   detailHrefPrefix,
+  moneyColumns,
 }: {
   resource: ResourceName;
   title: string;
@@ -176,9 +180,18 @@ export function ResourceManager({
   /** Base path for a per-row "View" link, e.g. "/admin/customers" → "/admin/customers/<id>". A
    *  plain string rather than a callback because Server Components can only pass serializable props. */
   detailHrefPrefix?: string;
+  /** Columns holding dollar amounts, shown as $1,234.50. */
+  moneyColumns?: string[];
 }) {
   const router = useRouter();
   const [rows, setRows] = useState(initialRows);
+  // router.refresh() re-renders the page with fresh server rows. Take them, so a change made in
+  // another panel shows here too (a new line item changes its quote's total).
+  const [serverRows, setServerRows] = useState(initialRows);
+  if (initialRows !== serverRows) {
+    setServerRows(initialRows);
+    setRows(initialRows);
+  }
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -191,6 +204,12 @@ export function ResourceManager({
   }, [sorted, query, columns]);
   const editingRow = rows.find((row) => row.id === editingId) ?? null;
   const actionsColumn = canEdit || canDelete || statusField || detailHrefPrefix;
+
+  function cellText(row: StoredRecord, column: string): string {
+    if (column.endsWith("_id")) return optionLabel(fields.find((field) => field.name === column)?.options, String(row[column] ?? ""));
+    if (moneyColumns?.includes(column) && row[column] !== null && row[column] !== undefined) return formatMoney(row[column]);
+    return display(row[column]);
+  }
 
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -235,6 +254,7 @@ export function ResourceManager({
       setRows((current) => current.map((item) => item.id === editingRow.id ? payload.row : item));
       setEditingId(null);
       setMessage("Changes saved");
+      router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not update");
     } finally {
@@ -253,6 +273,7 @@ export function ResourceManager({
     const payload = await response.json();
     if (!response.ok) { setMessage(payload.error || "Could not update"); return; }
     setRows((current) => current.map((item) => item.id === row.id ? payload.row : item));
+    router.refresh();
   }
 
   async function remove(row: StoredRecord) {
@@ -337,7 +358,7 @@ export function ResourceManager({
           <tbody>
             {filtered.map((row) => (
               <tr key={row.id} className="border-b border-[#efedea] align-top">
-                {columns.map((column) => <td key={column} className="max-w-[260px] px-3 py-3 leading-5 text-[#4f4f4f]"><span className="line-clamp-3">{column.endsWith("_id") ? optionLabel(fields.find((field) => field.name === column)?.options, String(row[column] ?? "")) : display(row[column])}</span></td>)}
+                {columns.map((column) => <td key={column} className="max-w-[260px] px-3 py-3 leading-5 text-[#4f4f4f]"><span className="line-clamp-3">{cellText(row, column)}</span></td>)}
                 {actionsColumn && <td className="px-3 py-3"><div className="flex flex-wrap gap-2">
                   {detailHrefPrefix && <a href={`${detailHrefPrefix}/${row.id}`} className="rounded-full border border-[#dcd9d4] bg-white px-3 py-1.5 text-[11px] font-bold transition-colors hover:border-[#b9b4ad] hover:bg-[#f4f4f5]">View</a>}
                   {canEdit && fields.length > 0 && <button type="button" onClick={() => { setEditingId(row.id); setMessage(""); }} className="rounded-full border border-[#dcd9d4] bg-white px-3 py-1.5 text-[11px] font-bold transition-colors hover:border-[#b9b4ad] hover:bg-[#f4f4f5]">Edit</button>}
