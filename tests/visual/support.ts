@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 const ROOT = join(__dirname, "..", "..");
 const FONTS = join(__dirname, "..", "fixtures", "fonts");
@@ -42,6 +42,20 @@ export function slug(path: string): string {
 
 /** 1×1 grey PNG standing in for YouTube poster thumbnails, which change without notice. */
 const POSTER = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mNoaGgAAAMEAYFL09IQAAAAAElFTkSuQmCC", "base64");
+
+const FILM_TITLE = "All Things Fresh detailing video";
+
+/**
+ * Third-party embeds, masked in page captures because their pixels cannot be pinned. The homepage
+ * film player is scaled past its rounded box, so a mask on the iframe would also hide the page
+ * around it; the box the video plays in is masked instead.
+ */
+export function thirdPartyEmbeds(page: Page): Locator[] {
+  return [
+    page.locator(`iframe:not([title="${FILM_TITLE}"])`),
+    page.locator(`iframe[title="${FILM_TITLE}"]`).locator("xpath=.."),
+  ];
+}
 
 /**
  * Makes a page deterministic without changing what it renders:

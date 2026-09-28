@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { TenantConfig } from "@/tenant/schema";
 import type { SlotMedia } from "@/lib/content/catalog";
+import { filmVideoUrl } from "@/lib/content/film-video";
 import { resolveSocialFeed } from "@/lib/social/content";
 import { addMenuToggle, SHARED_RESPONSIVE_RULES } from "@/lib/locked-design/responsive";
 
@@ -192,6 +193,28 @@ function setDesignProps(markup: string, values: Record<string, unknown>): string
   return markup.replace(match[0], () => match[0].replace(match[1], () => encoded));
 }
 
+const FILM_PLAYER = /<sc-if value="\{\{ videoPlaying \}\}"[^>]*>[\s\S]*?<\/sc-if>/;
+const FILM_PLACEHOLDER = /<sc-if value="\{\{ noVideo \}\}"[^>]*>[\s\S]*?<\/sc-if>/;
+const FILM_SRC = 'src="{{ videoSrc }}"';
+
+/**
+ * The film section plays the tenant's video through the design's own `youtubeUrl` prop, which
+ * builds the muted, looping, chrome-free YouTube or Vimeo embed. Every `sc-if` branch of the raw
+ * template shows until the runtime boots, so the branch that will not render is dropped here;
+ * otherwise the placeholder flashes before the video. The iframe's src goes through the runtime's
+ * camel-case attribute, which the browser ignores, so the player loads once, after boot, and never
+ * requests the literal "{{ videoSrc }}".
+ */
+function applyFilmVideo(markup: string, tenant?: TenantConfig): string {
+  const player = markup.match(FILM_PLAYER)?.[0];
+  const placeholder = markup.match(FILM_PLACEHOLDER)?.[0];
+  if (!player || !placeholder || !player.includes(FILM_SRC)) throw new Error("Approved film section was not found");
+  const url = filmVideoUrl(tenant?.media.filmVideo);
+  if (!url) return markup.replace(player, "");
+  const deferredPlayer = player.replace(FILM_SRC, 'sc-camel-src="{{ videoSrc }}"');
+  return setDesignProps(markup.replace(placeholder, "").replace(player, () => deferredPlayer), { youtubeUrl: url });
+}
+
 function applyBusinessSettings(markup: string, tenant?: TenantConfig): string {
   if (!tenant) return markup;
   const phoneDigits = tenant.business.phone.replace(/\D/g, "");
@@ -226,6 +249,7 @@ export function getLockedHomeMarkup(tenant?: TenantConfig, media: Record<string,
   let markup = match[1];
   markup = setDesignProps(markup, { showComparison: true });
   markup = makeComparisonKeyboardAccessible(markup);
+  markup = applyFilmVideo(markup, tenant);
   markup = markup.replace("</helmet>", `${responsiveCss}</helmet>`);
   markup = addMenuToggle(markup);
   markup = markup.replaceAll('src="assets/', 'src="/assets/');

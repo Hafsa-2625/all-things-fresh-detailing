@@ -51,7 +51,9 @@ export const allThingsFreshTenant: TenantConfig = {
     allowSwitch: true,
   },
 
-  media: {},
+  media: {
+    filmVideo: "https://vimeo.com/1182495984",
+  },
 
   services: [
     { id: "full-maintenance", slug: "full-maintenance", name: "Full Maintenance", category: "full", blurb: "A complete interior and exterior refresh for regular upkeep.", pricingMode: "starting_at", layout: "editorial" },

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openStable, REFERENCE_VIEWPORT, VIEWPORTS } from "./support";
+import { openStable, REFERENCE_VIEWPORT, thirdPartyEmbeds, VIEWPORTS } from "./support";
 
 const CAR_FRAMES = [0, 4.25, 8.4] as const;
 
@@ -32,6 +32,6 @@ test.describe(`reference screenshot size ${REFERENCE_VIEWPORT.width}x${REFERENCE
 
   test("homepage full page", async ({ page, baseURL }) => {
     await openStable(page, baseURL!, "/");
-    await expect(page).toHaveScreenshot([REFERENCE_VIEWPORT.name, "home.png"], { fullPage: true, mask: [page.locator("iframe")] });
+    await expect(page).toHaveScreenshot([REFERENCE_VIEWPORT.name, "home.png"], { fullPage: true, mask: thirdPartyEmbeds(page) });
   });
 });
