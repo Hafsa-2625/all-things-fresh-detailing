@@ -1,6 +1,8 @@
 import { requireStaff, canWrite } from "@/lib/admin/session";
 import { getLatestConfigForEditing } from "@/tenant/admin-queries";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { listRecords } from "@/lib/operations/store";
+import { MediaLibrary } from "@/components/admin/media-library";
 import { WebsiteForm } from "./website-form";
 
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "all-things-fresh";
@@ -34,7 +36,13 @@ export default async function WebsiteSettingsPage() {
           </p>
         </div>
       ) : (
-        <WebsiteForm config={config} canEdit={canWrite(profile.role)} />
+        <>
+          <WebsiteForm config={config} canEdit={canWrite(profile.role)} />
+          {/* Photos for the homepage slots (service cards, before/after) — content only, the boxes are fixed. */}
+          <div className="mt-8 max-w-[1280px]">
+            <MediaLibrary initialRows={await listRecords("media_assets")} canEdit={canWrite(profile.role)} />
+          </div>
+        </>
       )}
     </div>
   );

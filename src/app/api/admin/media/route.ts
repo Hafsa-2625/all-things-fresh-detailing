@@ -6,6 +6,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { deleteRecord, findRecord, insertRecord, listRecords } from "@/lib/operations/store";
 import { findMediaSlot } from "@/lib/content/media-slots";
 import { imageDimensions } from "@/lib/media/dimensions";
+import { optimizeSlotImage } from "@/lib/media/optimize";
 
 const MAX_BYTES = 12 * 1024 * 1024;
 /** Created by supabase/migrations/0003_security_hardening.sql. */
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
   // Only the slots the approved design exposes can be filled, and a slot photo must be large
   // enough for the box it is cropped into.
   const dimensions = imageDimensions(bytes, detected.type);
+  let stored: { bytes: Buffer; type: string; extension: string; width: number | null; height: number | null } = { bytes, type: detected.type, extension: detected.extension, width: dimensions?.width ?? null, height: dimensions?.height ?? null };
   if (slotBinding) {
     const slot = findMediaSlot(slotBinding);
     if (!slot) return NextResponse.json({ error: "That template slot does not exist in the approved design" }, { status: 422 });
@@ -67,10 +69,18 @@ export async function POST(request: Request) {
     if (dimensions && (dimensions.width < slot.minWidth || dimensions.height < slot.minHeight)) {
       return NextResponse.json({ error: `${slot.label} needs an image at least ${slot.minWidth}×${slot.minHeight}px; this one is ${dimensions.width}×${dimensions.height}px` }, { status: 422 });
     }
+    // It goes straight onto a public page, so it is stored web-sized rather than as uploaded.
+    try {
+      const optimized = await optimizeSlotImage(bytes);
+      stored = { bytes: optimized.bytes, type: "image/webp", extension: "webp", width: optimized.width, height: optimized.height };
+    } catch (error) {
+      console.error("[admin/media] could not re-encode the slot image", error);
+      return NextResponse.json({ error: "That image could not be processed. Try saving it again as a JPG." }, { status: 422 });
+    }
   }
 
-  const storagePath = `${TENANT_ID}/${new Date().getUTCFullYear()}/${safeBaseName(file.name)}-${randomUUID()}.${detected.extension}`;
-  const uploaded = await supabase.storage.from(BUCKET).upload(storagePath, bytes, { contentType: detected.type, upsert: false, cacheControl: "31536000" });
+  const storagePath = `${TENANT_ID}/${new Date().getUTCFullYear()}/${safeBaseName(file.name)}-${randomUUID()}.${stored.extension}`;
+  const uploaded = await supabase.storage.from(BUCKET).upload(storagePath, stored.bytes, { contentType: stored.type, upsert: false, cacheControl: "31536000" });
   if (uploaded.error) {
     if (/bucket not found/i.test(uploaded.error.message)) {
       return NextResponse.json({ error: "Media storage is not set up. Run the database migrations." }, { status: 503 });
@@ -85,10 +95,10 @@ export async function POST(request: Request) {
       file_name: file.name.slice(0, 180),
       storage_path: publicUrl,
       alt_text: altText,
-      mime_type: detected.type,
+      mime_type: stored.type,
       slot_binding: slotBinding || null,
-      width: dimensions?.width ?? null,
-      height: dimensions?.height ?? null,
+      width: stored.width,
+      height: stored.height,
     }, profile.id);
     // A photo bound to a design slot is live content: refresh the pages that show it.
     if (slotBinding) revalidatePath("/", "layout");
