@@ -48,4 +48,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /blob-report/
+# Local visual baselines (~100 MB, platform-specific); curated before/after shots live in docs/screenshots/
+/tests/visual/__baselines__/
 docs/PROJECT_GUIDE_AND_TEST_PLAN.md
