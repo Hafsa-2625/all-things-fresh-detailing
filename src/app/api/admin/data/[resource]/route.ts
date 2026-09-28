@@ -54,6 +54,11 @@ function writeGuard(profile: StaffProfile, resource: ResourceName): Problem | nu
   return canWrite(profile.role) ? null : { error: "Manager role required", status: 403 };
 }
 
+/** A quote has to be for someone: a lead, a customer, or both. */
+function quoteProblem(quote: Record<string, unknown>): Problem | null {
+  return quote.lead_id || quote.customer_id ? null : { error: "Choose the lead or customer this quote is for", status: 422 };
+}
+
 function notificationRuleProblem(rule: Record<string, unknown>): Problem | null {
   if (rule.channel === "email" && !z.string().email().safeParse(rule.destination).success) {
     return { error: "Use a valid email address", status: 422 };
@@ -70,7 +75,10 @@ function databaseProblem(error: unknown, action: "write" | "delete" = "write"): 
       ? { error: "Other records still reference this — remove those first", status: 422 }
       : { error: "A linked record does not exist", status: 422 };
   }
-  if (code === "23514" || code === "22P02" || code === "22007" || code === "22008") return { error: "One or more values are not valid", status: 422 };
+  if (code === "23514" || code === "22P02" || code === "22007" || code === "22008" || code === "22003") return { error: "One or more values are not valid", status: 422 };
+  // Raised on purpose by the quote triggers (e.g. an accepted quote's prices are locked); the
+  // message is written for staff, so pass it through.
+  if (code === "55000") return { error: String((error as { message?: unknown }).message ?? "This record cannot be changed now"), status: 409 };
   const message = error instanceof Error ? error.message : "";
   if (message === "Record not found") return { error: "Record not found", status: 404 };
   console.error(`[admin/data] ${action} failed`, error);
@@ -227,6 +235,10 @@ export async function POST(request: Request, context: RouteContext) {
     const ruleProblem = notificationRuleProblem(values);
     if (ruleProblem) return problem(ruleProblem);
   }
+  if (resource === "quotes") {
+    const missingParty = quoteProblem(values);
+    if (missingParty) return problem(missingParty);
+  }
   if (resource === "case_studies" || resource === "content_pages") {
     const contentProblem = resource === "case_studies" ? await caseStudyProblem(values) : await contentPageProblem(values);
     if (contentProblem) return problem(contentProblem);
@@ -294,6 +306,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (resource === "notification_rules") {
     const ruleProblem = notificationRuleProblem({ ...existing, ...values });
     if (ruleProblem) return problem(ruleProblem);
+  }
+  if (resource === "quotes") {
+    const missingParty = quoteProblem({ ...existing, ...values });
+    if (missingParty) return problem(missingParty);
   }
   if (resource === "case_studies" || resource === "content_pages") {
     const merged = { ...existing, ...values };

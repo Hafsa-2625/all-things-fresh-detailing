@@ -138,7 +138,7 @@ async function databaseSuite() {
 
   const attacker = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
   await attacker.auth.signUp({ email: email("selfsignup"), password: "Attacker-Password-123" });
-  for (const table of ["customers", "leads", "profiles", "audit_log", "staff_invites", "tenant_configs", "rate_limits"]) {
+  for (const table of ["customers", "leads", "quotes", "quote_items", "profiles", "audit_log", "staff_invites", "tenant_configs", "rate_limits"]) {
     const { data } = await attacker.from(table).select("*");
     check(`self-registered account reads nothing from ${table}`, (data ?? []).length === 0 || (table === "tenant_configs" && (data ?? []).every((row) => row.status === "published")), (data ?? []).length);
   }
@@ -148,6 +148,8 @@ async function databaseSuite() {
   check("redirect hit counter is not callable by users", Boolean(hit.error));
   const limiter = await createClient(SUPABASE_URL, ANON_KEY).rpc("rate_limit_hit", { p_key: "x", p_window_seconds: 1, p_max: 1 });
   check("rate limiter is not callable anonymously", Boolean(limiter.error));
+  const scheduled = await attacker.rpc("schedule_quote", { p_tenant_id: "all-things-fresh", p_quote_id: crypto.randomUUID(), p_starts_at: new Date().toISOString(), p_actor: null });
+  check("quote scheduling is not callable by users", scheduled.error?.code === "42501", scheduled.error?.code);
   const evil = await service.from("redirects").insert({ source_path: `/db-evil-${RUN}`, destination_path: "//evil.example" });
   check("database rejects protocol-relative redirect destinations", Boolean(evil.error));
 }

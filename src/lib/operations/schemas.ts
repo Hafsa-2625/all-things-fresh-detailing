@@ -47,12 +47,18 @@ export const publicLeadIntakeSchema = leadIntakeSchema.safeExtend({ preferredDat
 
 const status = z.string().trim().min(1).max(60);
 
+export const QUOTE_STATUSES = ["draft", "sent", "accepted", "declined", "expired"] as const;
+
 export const resourceCreateSchemas = {
   leads: leadIntakeSchema.extend({ requested_service: optionalShort, stage: status.optional(), owner_id: id.optional().nullable(), customer_id: id.optional().nullable() }),
   customers: z.object({ name: short, phone: optionalShort, email: z.string().email().optional().nullable(), street: optionalShort, city: optionalShort, state: optionalShort, postal_code: optionalShort, notes: z.string().max(5000).optional().nullable() }),
   vehicles: z.object({ customer_id: id, year: z.coerce.number().int().min(1900).max(2100).optional().nullable(), make: optionalShort, model: optionalShort, color: optionalShort, plate: optionalShort, notes: z.string().max(5000).optional().nullable() }),
   appointments: z.object({ lead_id: id.optional().nullable(), customer_id: id.optional().nullable(), vehicle_id: id.optional().nullable(), service_id: id.optional().nullable(), starts_at: z.string(), ends_at: z.string().optional().nullable(), status: status.default("scheduled"), address: optionalShort, notes: z.string().max(5000).optional().nullable() }),
   jobs: z.object({ appointment_id: id.optional().nullable(), customer_id: id.optional().nullable(), vehicle_id: id.optional().nullable(), status: status.default("scheduled"), scheduled_date: z.string().optional().nullable(), arrival_window: optionalShort, address: optionalShort, checklist: z.array(z.unknown()).default([]), notes: z.string().max(5000).optional().nullable() }),
+  // Subtotal and total are computed by the database from the line items, so neither is accepted
+  // here; tax is the one amount staff type. appointment_id / job_id are set only by scheduling.
+  quotes: z.object({ lead_id: id.optional().nullable(), customer_id: id.optional().nullable(), status: z.enum(QUOTE_STATUSES).default("draft"), tax: money.default(0), expires_on: isoDate.optional().nullable(), notes: z.string().max(5000).optional().nullable() }),
+  quote_items: z.object({ quote_id: id, description: z.string().trim().min(1).max(300), quantity: z.coerce.number().finite().positive().max(999).default(1), unit_price: money }),
   // Field limits mirror the space the approved components give each slot (spec §4), and the array
   // limits mirror how many of each the design renders.
   services: z.object({ name: short, slug: z.string().regex(/^[a-z0-9-]+$/), short_blurb: z.string().max(240), long_body: z.string().max(20000).optional().nullable(), price_from: money.optional().nullable(), status: status.default("draft"), seo_title: optionalShort, seo_description: z.string().max(320).optional().nullable(), media_path: optionalShort,
