@@ -124,7 +124,51 @@ function fillApprovedMediaSlots(markup: string, media: Record<string, SlotMedia>
     const pattern = new RegExp(`<image-slot id="${id}"[\\s\\S]*?<\\/image-slot>`, "i");
     result = result.replace(pattern, `<img src="${src}" alt="${alt}" loading="lazy" decoding="async" style="display:block;width:100%;height:100%;object-fit:cover;" />`);
   }
+  return fillComparePhotos(result, media);
+}
+
+/*
+ * The before/after comparison photos. The originals are 2752x1536 JPEGs of ~3.5 MB; the page serves
+ * WebP resizes built by scripts/optimize-compare-photos.mjs (same widths as below).
+ */
+const COMPARE_WIDTHS = [640, 960, 1440, 1920, 2560];
+// The box is 520px tall (360px on phones) and the photos cover it, so below ~990px they are drawn
+// wider than the box: 520 x 2752/1536 = 932px, and 645px on phones. Above that the box width wins.
+const COMPARE_SIZES = "(max-width: 600px) 645px, (max-width: 992px) 932px, (max-width: 1180px) calc(100vw - 60px), 1120px";
+// Exactly as the approved source ships them, after the /assets/ path rewrite.
+const COMPARE_PHOTOS = [
+  { slot: "compare-before", tag: '<img src="/assets/compare/before.jpg" alt="Before detailing" draggable="false"', file: "before", alt: "Before detailing" },
+  { slot: "compare-after", tag: '<img src="/assets/compare/after.jpg" alt="After detailing" draggable="false"', file: "after", alt: "After detailing" },
+];
+
+function fillComparePhotos(markup: string, media: Record<string, SlotMedia>): string {
+  let result = markup;
+  for (const photo of COMPARE_PHOTOS) {
+    if (!result.includes(photo.tag)) throw new Error(`Approved comparison photo was not found: ${photo.file}`);
+    const published = media[photo.slot];
+    // An upload is a single file; the versioned photo comes in several widths.
+    const source = published
+      ? `src="${escapeHtml(published.url)}"`
+      : `src="/assets/compare/${photo.file}-1440.webp" srcset="${COMPARE_WIDTHS.map((width) => `/assets/compare/${photo.file}-${width}.webp ${width}w`).join(", ")}" sizes="${COMPARE_SIZES}"`;
+    result = result.replace(photo.tag, `<img ${source} alt="${escapeHtml(published?.alt || photo.alt)}" loading="lazy" decoding="async" draggable="false"`);
+  }
   return result;
+}
+
+/**
+ * Sets default values of the design's own props (the `data-props` metadata the design runtime reads
+ * its defaults from), so the server markup and the booted page agree.
+ */
+function setDesignProps(markup: string, values: Record<string, unknown>): string {
+  const match = markup.match(/<script type="text\/x-dc" data-dc-script data-props="([^"]*)">/);
+  if (!match) throw new Error("Homepage design props were not found");
+  const props = JSON.parse(match[1].replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as Record<string, { default?: unknown }>;
+  for (const [name, value] of Object.entries(values)) {
+    if (!props[name]) throw new Error(`Homepage design prop "${name}" does not exist`);
+    props[name].default = value;
+  }
+  const encoded = JSON.stringify(props).replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+  return markup.replace(match[0], () => match[0].replace(match[1], () => encoded));
 }
 
 function applyBusinessSettings(markup: string, tenant?: TenantConfig): string {
@@ -159,6 +203,7 @@ export function getLockedHomeMarkup(tenant?: TenantConfig, media: Record<string,
   if (!match) throw new Error("Approved homepage body was not found");
 
   let markup = match[1];
+  markup = setDesignProps(markup, { showComparison: true });
   markup = markup.replace("</helmet>", `${responsiveCss}</helmet>`);
   markup = addMenuToggle(markup);
   markup = markup.replaceAll('src="assets/', 'src="/assets/');
