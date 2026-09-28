@@ -16,6 +16,7 @@
     "qa:crawl": "node scripts/run-tsx.cjs scripts/crawl-check.ts",
     "qa:api": "node scripts/run-tsx.cjs scripts/api-smoke.ts",
     "qa:security": "node scripts/run-tsx.cjs scripts/security-e2e.ts",
+    "test:db": "node scripts/run-tsx.cjs --test tests/db/*.test.ts",
     "build:visual": "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= SUPABASE_SERVICE_ROLE_KEY= next build",
     "start:visual": "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= SUPABASE_SERVICE_ROLE_KEY= next start -p 3200",
     "test:visual": "playwright test --project=visual",
@@ -32,6 +33,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
