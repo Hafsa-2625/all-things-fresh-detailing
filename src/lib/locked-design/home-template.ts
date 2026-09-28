@@ -221,13 +221,13 @@ function applyBusinessSettings(markup: string, tenant?: TenantConfig): string {
   const phone = escapeHtml(tenant.business.phone);
   const instagram = escapeHtml(tenant.social.instagram.url || "https://www.instagram.com/atfcardetailing");
   const tiktok = escapeHtml(tenant.social.tiktok.url || "https://www.tiktok.com/@atfcardetailing1");
+  // One pass per platform: a URL that starts with the default one (".../atfcardetailing.cle") must
+  // not be matched again and doubled once it has been written in.
   let result = markup
     .replaceAll("440-841-8189", phone)
     .replaceAll("tel:4408418189", `tel:${phoneDigits}`)
-    .replaceAll("https://instagram.com/atfcardetailing", instagram)
-    .replaceAll("https://www.instagram.com/atfcardetailing", instagram)
-    .replaceAll("https://www.tiktok.com/@atfcardetailing1", tiktok)
-    .replaceAll("https://www.tiktok.com/@atfcardetailing", tiktok);
+    .replace(/https:\/\/(?:www\.)?instagram\.com\/atfcardetailing/g, () => instagram)
+    .replace(/https:\/\/www\.tiktok\.com\/@atfcardetailing1?/g, () => tiktok);
   const customerCount = tenant.trustStats.find((item) => item.id === "happyCustomers")?.value;
   if (customerCount) result = result.replaceAll("+500", escapeHtml(customerCount.startsWith("+") ? customerCount : `+${customerCount.replace(/\+$/, "")}`));
   return result;
