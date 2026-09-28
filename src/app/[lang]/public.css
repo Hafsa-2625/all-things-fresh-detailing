@@ -47,6 +47,54 @@ sc-if[hint-placeholder-val="{{ false }}"] {
   font: 700 13px/1.4 Arial, Helvetica, sans-serif;
 }
 
+/*
+ * Header menu toggle, added to the approved nav by src/lib/locked-design/responsive.ts and
+ * driven by DcRuntime. Hidden on desktop, where the nav is exactly as approved.
+ */
+.atf-menu-toggle { display: none; }
+
+@media (max-width: 900px) {
+  #atf-site-nav {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 2px !important;
+  }
+  #atf-site-nav > :not(.atf-menu-toggle) { display: none !important; }
+  /* Open: pinned to the header's corner so the logo beside it cannot push it off screen. */
+  #atf-site-nav:has(> .atf-menu-toggle[aria-expanded="true"]) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 220px;
+  }
+  #atf-site-nav .atf-menu-toggle[aria-expanded="true"] ~ a {
+    display: block !important;
+    padding: 11px 16px !important;
+    font-size: 15px !important;
+  }
+  #atf-site-nav .atf-menu-toggle[aria-expanded="true"] ~ button {
+    display: inline-flex !important;
+    align-self: flex-start;
+    margin-top: 8px;
+  }
+  .atf-menu-toggle {
+    display: grid;
+    place-items: center;
+    align-self: flex-end;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #2c3033;
+    color: #fff;
+    cursor: pointer;
+  }
+  .atf-menu-toggle__close,
+  .atf-menu-toggle[aria-expanded="true"] .atf-menu-toggle__open { display: none; }
+  .atf-menu-toggle[aria-expanded="true"] .atf-menu-toggle__close { display: block; }
+}
+
 /* —— Social feeds (Car Bros card treatment, ATF theme) —— */
 .atf-social {
   background: #000;

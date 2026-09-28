@@ -39,7 +39,8 @@ test("homepage type and colour tokens", async ({ page, baseURL }) => {
       tints: all("#area, #book").map((element) => pick(element, ["background-color"])),
       nav: pick(document.querySelector("#top header nav"), ["background-color"]),
       navActive: pick(document.querySelector("#top header nav a"), ["background-color", "color"]),
-      navLinks: all("#top header nav a:not(:first-child)").map((element) => pick(element, ["color"])),
+      // Every link but the active Home pill (the nav's first child is the mobile menu toggle).
+      navLinks: all("#top header nav a:not(:first-of-type)").map((element) => pick(element, ["color"])),
       containers: all('#top [style*="width: min(100%, 1120px)"]').map((element) => element.getBoundingClientRect().width),
       reviewSurface: anyColor("background-color", "rgb(244, 244, 244)"),
       stars: anyColor("color", "rgb(245, 166, 35)") || anyColor("fill", "rgb(245, 166, 35)"),

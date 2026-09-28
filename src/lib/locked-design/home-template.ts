@@ -5,6 +5,7 @@ import { join } from "node:path";
 import type { TenantConfig } from "@/tenant/schema";
 import type { SlotMedia } from "@/lib/content/catalog";
 import { resolveSocialFeed } from "@/lib/social/content";
+import { addMenuToggle } from "@/lib/locked-design/responsive";
 
 const sourcePath = join(process.cwd(), "design-source", "current-zip", "ATF Detail Site.dc.html");
 // Plain token (no block-comment delimiters) so bundlers cannot strip it.
@@ -135,6 +136,7 @@ export function getLockedHomeMarkup(tenant?: TenantConfig, media: Record<string,
 
   let markup = match[1];
   markup = markup.replace("</helmet>", `${responsiveCss}</helmet>`);
+  markup = addMenuToggle(markup);
   markup = markup.replaceAll('src="assets/', 'src="/assets/');
   markup = markup.replaceAll("['assets/", "['/assets/");
   markup = markup.replaceAll("url(assets/", "url(/assets/");

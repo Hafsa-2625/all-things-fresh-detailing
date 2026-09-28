@@ -7,6 +7,7 @@ import { buildPagePath } from "@/seo/metadata";
 import { getPublishedPages } from "@/seo/registry";
 import type { TenantConfig } from "@/tenant/schema";
 import { emptyCatalog, type CatalogReview, type PageCatalog } from "@/lib/content/catalog";
+import { addMenuToggle } from "@/lib/locked-design/responsive";
 import type { CaseStudy } from "@/lib/content/case-studies";
 
 export type LockedTemplate = "service" | "location" | "article" | "case";
@@ -89,6 +90,7 @@ function applyCommon(markup: string, page: SeoPage, template: LockedTemplate, te
     .replace('<a href="#book" style="padding: 10px 13px;', '<a href="/book" style="padding: 10px 13px;');
 
   result = result.replace("</helmet>", `${responsiveCss}</helmet>`);
+  result = addMenuToggle(result);
   const business = businessIdentity(tenant);
   const structured = JSON.stringify({
     "@context": "https://schema.org",
