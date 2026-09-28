@@ -448,8 +448,9 @@ function applyCase(markup: string, page: SeoPage, study?: CaseStudy): string {
   // Located after the hero swaps above, which change the text length before it.
   const caseBody = result.indexOf(CASE_BLOCK, caseHero + CASE_BLOCK.length);
   if (caseBody < 0) throw new Error("Approved case-study template blocks were not found");
-  result = swap(result, 'src="/assets/social-detail-2.png" alt="After detailing"', `src="${html(study.after.url)}" alt="${html(study.after.alt)}"`, caseBody);
-  result = swap(result, 'src="/assets/social-detail-1.png" alt="Before detailing"', `src="${html(study.before.url)}" alt="${html(study.before.alt)}"`, caseBody);
+  // The study's own photos go into the template's before/after slider.
+  result = swap(result, 'src="/assets/compare/after.jpg" alt="After detailing"', `src="${html(study.after.url)}" alt="${html(study.after.alt)}"`, caseBody);
+  result = swap(result, 'src="/assets/compare/before.jpg" alt="Before detailing"', `src="${html(study.before.url)}" alt="${html(study.before.alt)}"`, caseBody);
   CASE_SAMPLE_STEPS.forEach(([title, note], index) => {
     result = swap(result, `${CASE_STEP_TITLE}${title}</div>`, `${CASE_STEP_TITLE}${html(study.steps[index].title)}</div>`, caseBody);
     result = swap(result, `${CASE_STEP_NOTE}${note}</div>`, `${CASE_STEP_NOTE}${html(study.steps[index].note)}</div>`, caseBody);
