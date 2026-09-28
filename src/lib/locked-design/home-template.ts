@@ -32,8 +32,10 @@ const responsiveCss = `<style data-atf-responsive="true">${SHARED_RESPONSIVE_RUL
   #top .atf-services-head { flex-direction: column !important; align-items: flex-start !important; }
   #top .atf-services-head > [style*="justify-items: end"] { justify-items: start !important; }
   #top .atf-services-head [style*="text-align: right"] { text-align: left !important; }
-  /* Reviews: one card at a time; the arrows already rotate which review comes first. */
-  #reviews [style*="repeat(3"] > :not(:first-child) { display: none !important; }
+  /* Reviews: one card at a time; the arrows already rotate which review comes first. The cards
+     share one cell, so it is as tall as the longest review and the rotation never moves the page. */
+  #reviews [style*="repeat(3"] > * { grid-area: 1 / 1; }
+  #reviews [style*="repeat(3"] > :not(:first-child) { visibility: hidden; }
   #top [style*="grid-template-columns: 1.4fr 1fr 1fr"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   #top [style*="grid-template-columns: 1.4fr 1fr 1fr"] > :first-child { grid-column: 1 / -1; }
   #top form[style*="gap: 30px; padding: 34px"] { padding: 22px !important; }
