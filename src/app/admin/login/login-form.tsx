@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PasswordInput } from "@/components/admin/password-input";
 import { signIn, type LoginActionState } from "./actions";
 
 const initialState: LoginActionState = { status: "idle" };
@@ -20,7 +21,7 @@ export function LoginForm() {
 
       <label className="flex flex-col gap-1.5">
         <span className="text-small font-medium text-[var(--color-ink-muted)]">Password</span>
-        <input type="password" name="password" autoComplete="current-password" maxLength={128} className={inputClass} />
+        <PasswordInput name="password" autoComplete="current-password" maxLength={128} className={inputClass} />
       </label>
 
       <button

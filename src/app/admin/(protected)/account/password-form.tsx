@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PasswordInput } from "@/components/admin/password-input";
 import { setPassword, type PasswordActionState } from "./actions";
 
 const initialState: PasswordActionState = { status: "idle" };
@@ -16,11 +17,11 @@ export function PasswordForm({ email }: { email: string }) {
       <input type="email" name="username" value={email} autoComplete="username" readOnly hidden />
       <label className="flex flex-col gap-1.5">
         <span className="text-small font-medium text-[var(--color-ink-muted)]">New password</span>
-        <input type="password" name="password" required minLength={10} maxLength={128} autoComplete="new-password" className={inputClass} />
+        <PasswordInput name="password" required minLength={10} maxLength={128} autoComplete="new-password" className={inputClass} />
       </label>
       <label className="flex flex-col gap-1.5">
         <span className="text-small font-medium text-[var(--color-ink-muted)]">Confirm new password</span>
-        <input type="password" name="confirm" required minLength={10} maxLength={128} autoComplete="new-password" className={inputClass} />
+        <PasswordInput name="confirm" required minLength={10} maxLength={128} autoComplete="new-password" className={inputClass} />
       </label>
       <button
         type="submit"
